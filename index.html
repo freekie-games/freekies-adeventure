@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freekies World - Ultimate RPG</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixel+Operator&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFD700;
+            --dark: #1a1a2e;
+            --light: #F5F6FA;
+            --success: #95E1D3;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #1a1a1a;
+        }
+
+        body {
+            font-family: 'VT323', 'Courier New', monospace;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #gameContainer {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ===== PANTALLA DE TÍTULO ===== */
+        #titleScreen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 1s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #titleScreen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 107, 107, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(78, 205, 196, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        #logo {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(2rem, 8vw, 4rem);
+            color: var(--accent);
+            text-shadow: 
+                4px 4px 0 var(--primary),
+                8px 8px 0 var(--secondary),
+                12px 12px 20px rgba(0, 0, 0, 0.8);
+            margin-bottom: 2rem;
+            animation: bounce 2s infinite ease-in-out;
+            letter-spacing: 3px;
+            z-index: 10;
+        }
+
+        .menuButton {
+            background: linear-gradient(135deg, var(--primary) 0%, #FF5252 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            margin: 0.8rem;
+            font-size: clamp(0.8rem, 3vw, 1rem);
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            z-index: 10;
+        }
+
+        .menuButton:hover {
+            transform: translateY(-4px) scale(1.08);
+            box-shadow: 0 12px 35px rgba(255, 107, 107, 0.5);
+        }
+
+        /* ===== PANTALLA DE SELECCIÓN ===== */
+        #starterScreen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0F5F4C 0%, #1B9B8F 50%, #2EAD9B 100%);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            overflow-y: auto;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        #starterScreen h2 {
+            color: white;
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(1.2rem, 5vw, 2rem);
+            margin-bottom: 2rem;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .starterContainer {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+        }
+
+        .starterCard {
+            background: rgba(255, 255, 255, 0.95);
+            border: 4px solid #2D3436;
+            border-radius: 20px;
+            padding: 2rem;
+            width: 280px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .starterCard:hover {
+            transform: translateY(-15px) scale(1.08);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .starterCard img {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 1rem;
+            display: block;
+            image-rendering: pixelated;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        }
+
+        .starterCard h3 {
+            text-align: center;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .starterCard .stats {
+            font-size: 0.8rem;
+            color: #555;
+            line-height: 2;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        /* ===== PANTALLA DE JUEGO ===== */
+        #gameScreen {
+            width: 100%;
+            height: 100%;
+            display: none;
+            position: relative;
+            background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 100%);
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            image-rendering: pixelated;
+        }
+
+        #gameUI {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        #topBar {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.7) 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: all;
+            font-size: 0.9rem;
+            border-bottom: 3px solid var(--accent);
+            gap: 2rem;
+        }
+
+        #playerInfo {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        #partyDisplay {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .partyIcon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid var(--accent);
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .partyIcon:hover {
+            transform: scale(1.15);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .partyIcon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            image-rendering: pixelated;
+            padding: 3px;
+        }
+
+        .partyIcon .hpBar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: #333;
+        }
+
+        .partyIcon .hpFill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: width 0.3s;
+        }
+
+        #controls {
+            position: absolute;
+            bottom: 2rem;
+            right: 2rem;
+            display: none;
+            pointer-events: all;
+            gap: 0.5rem;
+        }
+
+        .controlBtn {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+            border: 3px solid var(--dark);
+            border-radius: 12px;
+            font-size: 1.8rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .controlBtn:active {
+            transform: scale(0.95);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ===== PANTALLA DE BATALLA ===== */
+        #battleScreen {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            background: linear-gradient(180deg, #87CEEB 0%, #90EE90 100%);
+            animation: fadeIn 0.5s ease-out;
+            position: relative;
+        }
+
+        #battleField {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .battleSide {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .freekieSprite {
+            width: 220px;
+            height: 220px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1));
+            border-radius: 20px;
+            position: relative;
+            transition: all 0.3s;
+            border: 4px solid rgba(255,255,255,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .freekieSprite img {
+            width: 180px;
+            height: 180px;
+            object-fit: contain;
+            image-rendering: pixelated;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        }
+
+        .freekieSprite.shake {
+            animation: shake 0.4s;
+        }
+
+        .freekieSprite.attack {
+            animation: attackAnim 0.5s;
+        }
+
+        .freekieInfo {
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            min-width: 200px;
+            text-align: center;
+            border: 2px solid var(--accent);
+        }
+
+        .hpBarBattle {
+            width: 100%;
+            height: 18px;
+            background: #333;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+            border: 2px solid #555;
+        }
+
+        .hpFillBattle {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: width 0.5s ease-out;
+        }
+
+        #battleMenu {
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.9));
+            border-top: 4px solid var(--accent);
+            padding: 1.5rem;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            pointer-events: all;
+        }
+
+        #battleText {
+            color: var(--accent);
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            min-height: 60px;
+            line-height: 1.6;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        #battleActions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .actionBtn {
+            background: linear-gradient(135deg, var(--primary) 0%, #FF5252 100%);
+            color: white;
+            border: 3px solid var(--accent);
+            padding: 1rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-radius: 12px;
+            font-family: 'Press Start 2P', monospace;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-transform: uppercase;
+            box-shadow: 0 6px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .actionBtn:hover:not(:disabled) {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.5);
+        }
+
+        .actionBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ===== DIÁLOGOS ===== */
+        #dialogBox {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(150px);
+            width: 90%;
+            max-width: 700px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.9));
+            border: 4px solid var(--accent);
+            border-radius: 15px;
+            padding: 1.5rem;
+            color: white;
+            font-size: 1rem;
+            display: none;
+            pointer-events: all;
+            z-index: 2000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        #dialogBox.active {
+            display: block;
+            animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        #dialogNPC {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        #dialogNPC img {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: #444;
+            object-fit: cover;
+            border: 3px solid var(--accent);
+        }
+
+        #dialogNPCName {
+            font-family: 'Press Start 2P', monospace;
+            color: var(--accent);
+            font-size: 1rem;
+        }
+
+        #dialogText {
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+
+        /* ===== MENÚS ===== */
+        #mainMenu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.98), rgba(45, 52, 54, 0.98));
+            border: 4px solid var(--accent);
+            border-radius: 20px;
+            padding: 2rem;
+            display: none;
+            z-index: 3000;
+            pointer-events: all;
+            animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+            min-width: 300px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        #mainMenu.active {
+            display: block;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .menuOption {
+            background: linear-gradient(135deg, #444, #555);
+            color: white;
+            border: 3px solid var(--accent);
+            padding: 1rem 1.5rem;
+            margin: 0.8rem 0;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s;
+            font-family: 'Press Start 2P', monospace;
+            text-transform: uppercase;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .menuOption:hover {
+            background: linear-gradient(135deg, #666, #777);
+            transform: translateX(10px);
+            box-shadow: 0 6px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        /* ===== PANTALLA DE EQUIPO ===== */
+        #partyScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: none;
+            flex-direction: column;
+            padding: 2rem;
+            overflow-y: auto;
+            z-index: 4000;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        #partyScreen.active {
+            display: flex;
+        }
+
+        #partyScreen h2 {
+            color: var(--accent);
+            font-family: 'Press Start 2P', monospace;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+        }
+
+        #partyList {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .partyMember {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border: 3px solid var(--accent);
+            border-radius: 15px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            color: white;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .partyMember:hover {
+            transform: translateY(-8px);
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.1));
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+        }
+
+        .partyMember img {
+            width: 100px;
+            height: 100px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            object-fit: contain;
+            image-rendering: pixelated;
+            border: 2px solid var(--accent);
+        }
+
+        .partyMemberInfo {
+            text-align: center;
+            width: 100%;
+        }
+
+        .partyMemberInfo h3 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1rem;
+            margin-bottom: 0.8rem;
+            color: var(--accent);
+        }
+
+        .stats {
+            font-size: 0.85rem;
+            line-height: 1.8;
+            color: #aaa;
+        }
+
+        /* ===== EFECTOS ===== */
+        .damageText {
+            position: fixed;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+            animation: damageFloat 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            z-index: 1000;
+        }
+
+        .particle {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFloat 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            z-index: 999;
+        }
+
+        /* ===== ANIMACIONES ===== */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+            20%, 40%, 60%, 80% { transform: translateX(8px); }
+        }
+
+        @keyframes attackAnim {
+            0% { transform: scale(1) translateX(0); }
+            50% { transform: scale(1.15) translateX(-20px); }
+            100% { transform: scale(1) translateX(0); }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateX(-50%) translateY(150px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+            to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        @keyframes particleFloat {
+            from { transform: translateY(0) scale(1); opacity: 1; }
+            to { transform: translateY(-120px) scale(0); opacity: 0; }
+        }
+
+        @keyframes damageFloat {
+            from { transform: translateY(0) scale(0.8); opacity: 1; }
+            to { transform: translateY(-80px) scale(1.2); opacity: 0; }
+        }
+
+        /* ===== BOTONES ESPECIALES ===== */
+        #audioControl {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: linear-gradient(135deg, var(--primary), #FF5252);
+            color: white;
+            border: 3px solid var(--accent);
+            padding: 0.8rem 1.2rem;
+            cursor: pointer;
+            border-radius: 10px;
+            z-index: 5000;
+            pointer-events: all;
+            font-size: 1.3rem;
+            transition: all 0.3s;
+            font-family: 'Press Start 2P', monospace;
+            box-shadow: 0 6px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        #audioControl:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.5);
+        }
+
+        /* ===== PANTALLA DE CURACIÓN ===== */
+        #healingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 4500;
+            animation: fadeIn 0.5s ease-out;
+            gap: 2rem;
+        }
+
+        #healingScreen.active {
+            display: flex;
+        }
+
+        .healingMessage {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1.8rem;
+            color: white;
+            text-align: center;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            #logo {
+                font-size: 2rem;
+            }
+
+            .menuButton {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.85rem;
+            }
+
+            .starterContainer {
+                gap: 1rem;
+            }
+
+            .starterCard {
+                width: 220px;
+            }
+
+            #controls {
+                bottom: 1rem;
+                right: 1rem;
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: repeat(3, 1fr);
+                width: 200px;
+                height: 200px;
+            }
+
+            .controlBtn {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+
+            #battleField {
+                flex-direction: column;
+                gap: 2rem;
+                padding: 1rem;
+            }
+
+            .freekieSprite {
+                width: 160px;
+                height: 160px;
+            }
+
+            .freekieSprite img {
+                width: 130px;
+                height: 130px;
+            }
+
+            #battleActions {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.8rem;
+            }
+
+            .actionBtn {
+                font-size: 0.75rem;
+                padding: 0.8rem;
+            }
+
+            #topBar {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            #playerInfo {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #topBar {
+                padding: 0.8rem 1rem;
+                font-size: 0.75rem;
+            }
+
+            #battleText {
+                font-size: 0.8rem;
+                min-height: 40px;
+            }
+
+            .freekieInfo {
+                font-size: 0.75rem;
+                padding: 0.8rem;
+                min-width: 150px;
+            }
+
+            #dialogBox {
+                width: 95%;
+                padding: 1rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- PANTALLA DE TÍTULO -->
+        <div id="titleScreen">
+            <div id="logo">FREEKIES</div>
+            <button class="menuButton" onclick="startNewGame()">▶ JUGAR</button>
+            <button class="menuButton" onclick="loadGame()">↻ CARGAR</button>
+            <button class="menuButton" onclick="showCredits()">ⓘ CRÉDITOS</button>
+        </div>
+
+        <!-- PANTALLA DE SELECCIÓN -->
+        <div id="starterScreen">
+            <h2>¡Elige tu Freekie inicial!</h2>
+            <div class="starterContainer" id="starterContainer"></div>
+        </div>
+
+        <!-- PANTALLA DE JUEGO -->
+        <div id="gameScreen">
+            <canvas id="gameCanvas"></canvas>
+            <div id="gameUI">
+                <div id="topBar">
+                    <div id="playerInfo">
+                        <span id="playerName">Aventurero</span>
+                        <span id="playerMoney">💰 3000</span>
+                        <span id="timeDisplay">☀️ Día 1</span>
+                    </div>
+                    <div id="partyDisplay"></div>
+                </div>
+            </div>
+
+            <!-- DIÁLOGO -->
+            <div id="dialogBox">
+                <div id="dialogNPC">
+                    <img id="dialogNPCImage" src="">
+                    <div id="dialogNPCName">NPC</div>
+                </div>
+                <div id="dialogText"></div>
+            </div>
+
+            <!-- MENÚ PRINCIPAL -->
+            <div id="mainMenu">
+                <div class="menuOption" onclick="showPartyScreen()">👥 EQUIPO</div>
+                <div class="menuOption" onclick="showBag()">🎒 MOCHILA</div>
+                <div class="menuOption" onclick="saveGame()">💾 GUARDAR</div>
+                <div class="menuOption" onclick="closeMainMenu()">❌ CERRAR</div>
+            </div>
+
+            <!-- PANTALLA DE EQUIPO -->
+            <div id="partyScreen">
+                <h2>TU EQUIPO</h2>
+                <div id="partyList"></div>
+                <button class="menuButton" onclick="closePartyScreen()">← VOLVER</button>
+            </div>
+
+            <!-- CONTROLES MÓVILES -->
+            <div id="controls">
+                <button class="controlBtn" style="grid-column: 2; grid-row: 1;" onclick="movePlayer(0, -1)">↑</button>
+                <button class="controlBtn" style="grid-column: 1; grid-row: 2;" onclick="movePlayer(-1, 0)">←</button>
+                <button class="controlBtn" style="grid-column: 2; grid-row: 2;" onclick="handleAction()">✓</button>
+                <button class="controlBtn" style="grid-column: 3; grid-row: 2;" onclick="movePlayer(1, 0)">→</button>
+                <button class="controlBtn" style="grid-column: 2; grid-row: 3;" onclick="movePlayer(0, 1)">↓</button>
+            </div>
+        </div>
+
+        <!-- PANTALLA DE BATALLA -->
+        <div id="battleScreen">
+            <div id="battleField">
+                <div class="battleSide">
+                    <div class="freekieSprite" id="playerFreekieSprite">
+                        <img id="playerFreekieImg" src="">
+                    </div>
+                    <div class="freekieInfo">
+                        <div id="playerFreekieName"></div>
+                        <div>Nv. <span id="playerFreekieLevel"></span></div>
+                        <div class="hpBarBattle">
+                            <div class="hpFillBattle" id="playerHPBar"></div>
+                        </div>
+                        <div id="playerFreekieHP"></div>
+                    </div>
+                </div>
+
+                <div class="battleSide">
+                    <div class="freekieSprite" id="enemyFreekieSprite">
+                        <img id="enemyFreekieImg" src="">
+                    </div>
+                    <div class="freekieInfo">
+                        <div id="enemyFreekieName"></div>
+                        <div>Nv. <span id="enemyFreekieLevel"></span></div>
+                        <div class="hpBarBattle">
+                            <div class="hpFillBattle" id="enemyHPBar"></div>
+                        </div>
+                        <div id="enemyFreekieHP"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="battleMenu">
+                <div id="battleText">¿Qué debería hacer tu Freekie?</div>
+                <div id="battleActions"></div>
+            </div>
+        </div>
+
+        <!-- PANTALLA DE CURACIÓN -->
+        <div id="healingScreen">
+            <div class="healingMessage">✨ Curando... ✨</div>
+        </div>
+
+        <!-- CONTROL DE AUDIO -->
+        <div id="audioControl" onclick="toggleAudio()">🔊</div>
+    </div>
+
+    <script>
+        // ===== BASE DE DATOS EXTENDIDA DE FREEKIES =====
+        const freekiesDB = [
+            // INICIALES (Charmander, Squirtle, Bulbasaur)
+            { id: 1, nombre: "Flamegallet", tipo: "Fuego", hp: 45, ataque: 52, defensa: 43, velocidad: 65, nivel: 5, exp: 0, expNext: 100, movimientos: ["Ascua", "Arañazo", "Rugido", "Mordisco Fuego"], evoluciona: { nivel: 16, id: 4 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png", rareza: "inicial" },
+            { id: 2, nombre: "Aquacookie", tipo: "Agua", hp: 44, ataque: 48, defensa: 65, velocidad: 43, nivel: 5, exp: 0, expNext: 100, movimientos: ["Pistola Agua", "Placaje", "Burbuja", "Mordisco"], evoluciona: { nivel: 16, id: 5 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/7.png", rareza: "inicial" },
+            { id: 3, nombre: "Leafbiscuit", tipo: "Planta", hp: 45, ataque: 49, defensa: 49, velocidad: 45, nivel: 5, exp: 0, expNext: 100, movimientos: ["Látigo Cepa", "Placaje", "Hoja Afilada", "Síntesis"], evoluciona: { nivel: 16, id: 6 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png", rareza: "inicial" },
+            // EVOLUCIONES (Charmeleon, Wartortle, Ivysaur)
+            { id: 4, nombre: "Blazecrisp", tipo: "Fuego", hp: 58, ataque: 64, defensa: 58, velocidad: 80, nivel: 16, movimientos: ["Lanzallamas", "Colmillo Igneo", "Giro Fuego", "Corte Furia"], evoluciona: { nivel: 36, id: 7 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/5.png", rareza: "raro" },
+            { id: 5, nombre: "Wavechoco", tipo: "Agua", hp: 59, ataque: 63, defensa: 80, velocidad: 58, nivel: 16, movimientos: ["Hidrobomba", "Rayo Burbuja", "Cascada", "Protección"], evoluciona: { nivel: 36, id: 8 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/8.png", rareza: "raro" },
+            { id: 6, nombre: "Forestwafer", tipo: "Planta", hp: 60, ataque: 62, defensa: 63, velocidad: 60, nivel: 16, movimientos: ["Rayo Solar", "Hoja Aguda", "Drenadoras", "Gigadrenado"], evoluciona: { nivel: 36, id: 9 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/2.png", rareza: "raro" },
+            // FINALES (Charizard, Blastoise, Venusaur)
+            { id: 7, nombre: "Infernocake", tipo: "Fuego", hp: 78, ataque: 84, defensa: 78, velocidad: 100, nivel: 36, movimientos: ["Explosión Fuego", "Sofoco", "Envite Igneo", "Llamarada"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png", rareza: "legendario" },
+            { id: 8, nombre: "Tsunamibite", tipo: "Agua", hp: 79, ataque: 83, defensa: 100, velocidad: 78, nivel: 36, movimientos: ["Acua Jet", "Hidrocañón", "Surf", "Torbellino"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/9.png", rareza: "legendario" },
+            { id: 9, nombre: "Titantreats", tipo: "Planta", hp: 80, ataque: 82, defensa: 83, velocidad: 80, nivel: 36, movimientos: ["Planta Feroz", "Terremoto Verde", "Latigazo", "Megaagotar"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/3.png", rareza: "legendario" },
+            // ELÉCTRICOS (Pichu, Pikachu, Raichu)
+            { id: 10, nombre: "Sparkcrumb", tipo: "Eléctrico", hp: 35, ataque: 55, defensa: 40, velocidad: 90, nivel: 5, movimientos: ["Impactrueno", "Chispa", "Onda Trueno", "Rayo"], evoluciona: { nivel: 20, id: 11 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/172.png", rareza: "común" },
+            { id: 11, nombre: "Voltsnack", tipo: "Eléctrico", hp: 60, ataque: 85, defensa: 50, velocidad: 120, nivel: 20, movimientos: ["Trueno", "Rayo Carga", "Voltio Cruel", "Chispazo"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png", rareza: "raro" },
+            // ROCOSOS (Geodude, Graveler, Golem)
+            { id: 12, nombre: "Rockcracker", tipo: "Roca", hp: 50, ataque: 80, defensa: 100, velocidad: 35, nivel: 8, movimientos: ["Lanzarrocas", "Tumba Rocas", "Avalancha", "Poder Pasado"], evoluciona: { nivel: 25, id: 13 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/74.png", rareza: "común" },
+            { id: 13, nombre: "Boulderbite", tipo: "Roca", hp: 80, ataque: 110, defensa: 130, velocidad: 45, nivel: 25, movimientos: ["Roca Afilada", "Terremoto", "Cabeza Roca", "Avalancha"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/76.png", rareza: "épico" },
+            // PSÍQUICOS (Abra, Kadabra, Alakazam)
+            { id: 14, nombre: "Mindmunch", tipo: "Psíquico", hp: 40, ataque: 35, defensa: 30, velocidad: 105, nivel: 10, movimientos: ["Confusión", "Psíquico", "Telequinesis", "Premonición"], evoluciona: { nivel: 28, id: 15 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/63.png", rareza: "raro" },
+            { id: 15, nombre: "Cerebroast", tipo: "Psíquico", hp: 70, ataque: 75, defensa: 70, velocidad: 115, nivel: 28, movimientos: ["Psíquico", "Futuro Sight", "Truco Psíquico", "Hipnosis"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/65.png", rareza: "épico" },
+            // LUCHA (Mankey, Primeape)
+            { id: 16, nombre: "Punchbar", tipo: "Lucha", hp: 70, ataque: 110, defensa: 60, velocidad: 70, nivel: 12, movimientos: ["Puño Dinámico", "Patada Baja", "Golpe Kárate", "A Bocajarro"], evoluciona: { nivel: 30, id: 17 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/56.png", rareza: "común" },
+            { id: 17, nombre: "Champbread", tipo: "Lucha", hp: 90, ataque: 130, defensa: 80, velocidad: 85, nivel: 30, movimientos: ["Patada Salto", "Puño Certera", "A Quemarropa", "Súper Puño"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/57.png", rareza: "épico" },
+            // FANTASMA (Gastly, Haunter, Gengar)
+            { id: 18, nombre: "Phantomunch", tipo: "Fantasma", hp: 45, ataque: 50, defensa: 45, velocidad: 95, nivel: 15, movimientos: ["Sombra Vil", "Lamer", "Maldición", "Bola Sombra"], evoluciona: { nivel: 32, id: 19 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/92.png", rareza: "raro" },
+            { id: 19, nombre: "Specterbite", tipo: "Fantasma", hp: 60, ataque: 65, defensa: 60, velocidad: 110, nivel: 32, movimientos: ["Garra Umbría", "Pesadilla", "Golpe Fantasma", "Infortunio"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/94.png", rareza: "épico" },
+            // NORMALES (Pidgeot)
+            { id: 20, nombre: "Butterchip", tipo: "Normal", hp: 40, ataque: 45, defensa: 35, velocidad: 55, nivel: 3, movimientos: ["Placaje", "Arañazo", "Gruñido", "Mordisco"], evoluciona: { nivel: 18, id: 21 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/19.png", rareza: "común" },
+            { id: 21, nombre: "Megabutter", tipo: "Normal", hp: 85, ataque: 80, defensa: 75, velocidad: 100, nivel: 18, movimientos: ["Hiperrayo", "Golpe", "Rapidez", "Triturar"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/20.png", rareza: "raro" },
+            // HIELO (Shellder, Cloyster)
+            { id: 22, nombre: "Frostcrunch", tipo: "Hielo", hp: 38, ataque: 41, defensa: 40, velocidad: 65, nivel: 7, movimientos: ["Viento Hielo", "Rayo Hielo", "Ventisca", "Colmillo Hielo"], evoluciona: { nivel: 22, id: 23 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/90.png", rareza: "común" },
+            { id: 23, nombre: "Glacierbake", tipo: "Hielo", hp: 70, ataque: 70, defensa: 80, velocidad: 70, nivel: 22, movimientos: ["Ventisca", "Puño Hielo", "Granizo", "Rayo Aurora"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/91.png", rareza: "épico" },
+            // VENENO (Ekans, Arbok)
+            { id: 24, nombre: "Venomwafer", tipo: "Veneno", hp: 40, ataque: 60, defensa: 30, velocidad: 55, nivel: 6, movimientos: ["Picotazo Veneno", "Ácido", "Residuos", "Lodo"], evoluciona: { nivel: 24, id: 25 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/23.png", rareza: "común" },
+            { id: 25, nombre: "Toxicrust", tipo: "Veneno", hp: 65, ataque: 90, defensa: 50, velocidad: 85, nivel: 24, movimientos: ["Bomba Lodo", "Tóxico", "Onda Tóxica", "Residuos"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/24.png", rareza: "épico" }
+        ];
+
+        const typeEffectiveness = {
+            Fuego: { debil: ["Agua", "Roca"], fuerte: ["Planta", "Hielo", "Acero"] },
+            Agua: { debil: ["Planta", "Eléctrico"], fuerte: ["Fuego", "Roca"] },
+            Planta: { debil: ["Fuego", "Hielo", "Veneno"], fuerte: ["Agua", "Roca"] },
+            Eléctrico: { debil: ["Roca"], fuerte: ["Agua"] },
+            Roca: { debil: ["Agua", "Planta", "Lucha"], fuerte: ["Fuego", "Hielo"] },
+            Psíquico: { debil: ["Fantasma"], fuerte: ["Lucha", "Veneno"] },
+            Lucha: { debil: ["Psíquico", "Hada"], fuerte: ["Normal", "Roca", "Acero"] },
+            Fantasma: { debil: ["Fantasma"], fuerte: ["Psíquico", "Fantasma"] },
+            Normal: { debil: ["Lucha"], fuerte: [] },
+            Hielo: { debil: ["Fuego", "Lucha", "Acero"], fuerte: ["Planta", "Dragón"] },
+            Veneno: { debil: ["Psíquico", "Roca"], fuerte: ["Planta", "Hada"] },
+            Acero: { debil: ["Fuego", "Lucha"], fuerte: ["Hielo", "Roca", "Hada"] },
+            Dragón: { debil: ["Hielo", "Dragón", "Hada"], fuerte: ["Dragón"] },
+            Hada: { debil: ["Veneno", "Acero"], fuerte: ["Lucha", "Dragón"] }
+        };
+
+        const gyms = [
+            { id: 1, nombre: "Gimnasio de Fuego", lider: "Ignatius", tipo: "Fuego", equipo: [{ id: 4, nivel: 14 }, { id: 1, nivel: 16 }], medalla: "Medalla Llama", x: 15, y: 10 },
+            { id: 2, nombre: "Gimnasio de Agua", lider: "Marina", tipo: "Agua", equipo: [{ id: 2, nivel: 18 }, { id: 5, nivel: 20 }], medalla: "Medalla Cascada", x: 30, y: 15 },
+            { id: 3, nombre: "Gimnasio de Planta", lider: "Flora", tipo: "Planta", equipo: [{ id: 3, nivel: 22 }, { id: 6, nivel: 24 }], medalla: "Medalla Hoja", x: 20, y: 25 },
+            { id: 4, nombre: "Gimnasio Eléctrico", lider: "Voltaire", tipo: "Eléctrico", equipo: [{ id: 10, nivel: 26 }, { id: 11, nivel: 28 }], medalla: "Medalla Voltio", x: 40, y: 20 }
+        ];
+
+        const npcs = [
+            { x: 25, y: 25, name: "Profesor Oak", dialog: "¡Bienvenido! Los Freekies son seres extraordinarios.", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/133.png" },
+            { x: 15, y: 15, name: "Entrenador Rojo", dialog: "¡Entrena y conviértete en un maestro!", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/39.png" },
+            { x: 30, y: 20, name: "Vendedora", dialog: "Aquí vendo todo tipo de items.", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/113.png" }
+        ];
+
+        let gameState = {
+            screen: "title",
+            player: { name: "Aventurero", x: 25, y: 25, direction: "down", money: 3000, medals: [], day: 1, time: 0 },
+            party: [],
+            inventory: { freekieball: 10, superball: 5, ultraball: 2, potion: 5, superpotion: 3, hyperpotion: 1, revive: 2 },
+            map: { width: 50, height: 50, tileSize: 32 },
+            battle: { active: false, playerFreekie: null, enemyFreekie: null, turn: "player", isWild: true },
+            audio: { enabled: true }
+        };
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            if (gameState.screen === "game") drawGame();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function startNewGame() {
+            document.getElementById('titleScreen').style.display = 'none';
+            document.getElementById('starterScreen').style.display = 'flex';
+            showStarters();
+        }
+
+        function showStarters() {
+            const container = document.getElementById('starterContainer');
+            container.innerHTML = '';
+            [freekiesDB[0], freekiesDB[1], freekiesDB[2]].forEach(freekie => {
+                const card = document.createElement('div');
+                card.className = 'starterCard';
+                card.innerHTML = `
+                    <img src="${freekie.sprite}" alt="${freekie.nombre}">
+                    <h3>${freekie.nombre}</h3>
+                    <div class="stats">
+                        <div>Tipo: ${freekie.tipo}</div>
+                        <div>HP: ${freekie.hp}</div>
+                        <div>ATQ: ${freekie.ataque}</div>
+                        <div>DEF: ${freekie.defensa}</div>
+                        <div>VEL: ${freekie.velocidad}</div>
+                    </div>
+                `;
+                card.onclick = () => selectStarter(freekie);
+                container.appendChild(card);
+            });
+        }
+
+        function selectStarter(freekie) {
+            const copy = JSON.parse(JSON.stringify(freekie));
+            copy.currentHP = copy.hp;
+            gameState.party.push(copy);
+            document.getElementById('starterScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            gameState.screen = "game";
+            showDialog("Profesor Oak", "¡Excelente elección! " + freekie.nombre + " será tu mejor aliado. ¡Buena suerte!", "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/133.png");
+            updatePartyDisplay();
+            drawGame();
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('freekiesWorldSave');
+            if (saved) {
+                gameState = JSON.parse(saved);
+                document.getElementById('titleScreen').style.display = 'none';
+                document.getElementById('gameScreen').style.display = 'block';
+                gameState.screen = "game";
+                updatePartyDisplay();
+                drawGame();
+            } else {
+                alert("No hay partida guardada");
+            }
+        }
+
+        function showCredits() {
+            alert("FREEKIES WORLD ULTIMATE v4.0\n\nJuego RPG estilo retro\nDesarrollado con HTML5, CSS3 y JavaScript\n\nSprites: PokéAPI\n\n✨ 25+ Freekies\n⚔️ Sistema de batalla completo\n📊 25 Freekies\n🎮 Experiencia retro mejorada\n\n¡Gracias por jugar!");
+        }
+
+        function drawGame() {
+            if (gameState.screen !== "game") return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#90EE90';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const tileSize = gameState.map.tileSize;
+            const offsetX = canvas.width / 2 - gameState.player.x * tileSize;
+            const offsetY = canvas.height / 2 - gameState.player.y * tileSize;
+
+            ctx.strokeStyle = '#7CBA6D';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < gameState.map.width; x++) {
+                for (let y = 0; y < gameState.map.height; y++) {
+                    ctx.strokeRect(x * tileSize + offsetX, y * tileSize + offsetY, tileSize, tileSize);
+                }
+            }
+
+            const cities = [
+                { name: "Start", x: 25, y: 25, size: 2, color: '#FFD700' },
+                { name: "Fuego", x: 15, y: 10, size: 2, color: '#FF6347' },
+                { name: "Agua", x: 30, y: 15, size: 2, color: '#4169E1' },
+                { name: "Planta", x: 20, y: 35, size: 2, color: '#32CD32' }
+            ];
+
+            cities.forEach(city => {
+                const px = city.x * tileSize + offsetX;
+                const py = city.y * tileSize + offsetY;
+                ctx.fillStyle = city.color;
+                ctx.fillRect(px, py, tileSize * city.size, tileSize * city.size);
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(px, py, tileSize * city.size, tileSize * city.size);
+            });
+
+            gyms.forEach(gym => {
+                const px = gym.x * tileSize + offsetX;
+                const py = gym.y * tileSize + offsetY;
+                ctx.fillStyle = '#8B0000';
+                ctx.fillRect(px, py, tileSize * 1.5, tileSize * 1.5);
+                ctx.strokeStyle = '#FFD700';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(px, py, tileSize * 1.5, tileSize * 1.5);
+                ctx.fillStyle = '#FFD700';
+                ctx.font = '24px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('🏛️', px + tileSize * 0.75, py + tileSize * 0.9);
+            });
+
+            npcs.forEach(npc => {
+                const px = npc.x * tileSize + offsetX;
+                const py = npc.y * tileSize + offsetY;
+                ctx.fillStyle = '#FF69B4';
+                ctx.beginPath();
+                ctx.arc(px + tileSize / 2, py + tileSize / 2, tileSize / 3, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            const px = gameState.player.x * tileSize + offsetX;
+            const py = gameState.player.y * tileSize + offsetY;
+            ctx.fillStyle = '#4169E1';
+            ctx.beginPath();
+            ctx.arc(px + tileSize / 2, py + tileSize / 2, tileSize / 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            const grassAreas = [
+                { x: 22, y: 22, w: 6, h: 6 },
+                { x: 12, y: 12, w: 5, h: 5 },
+                { x: 32, y: 18, w: 4, h: 4 },
+                { x: 18, y: 38, w: 5, h: 5 },
+                { x: 42, y: 22, w: 4, h: 4 }
+            ];
+            grassAreas.forEach(area => {
+                for (let x = area.x; x < area.x + area.w; x++) {
+                    for (let y = area.y; y < area.y + area.h; y++) {
+                        const px = x * tileSize + offsetX;
+                        const py = y * tileSize + offsetY;
+                        ctx.fillStyle = '#228B22';
+                        ctx.fillRect(px, py, tileSize, tileSize);
+                    }
+                }
+            });
+        }
+
+        function movePlayer(dx, dy) {
+            const newX = gameState.player.x + dx;
+            const newY = gameState.player.y + dy;
+
+            if (newX < 0 || newX >= gameState.map.width || newY < 0 || newY >= gameState.map.height) return;
+
+            if (dx > 0) gameState.player.direction = 'right';
+            else if (dx < 0) gameState.player.direction = 'left';
+            else if (dy > 0) gameState.player.direction = 'down';
+            else if (dy < 0) gameState.player.direction = 'up';
+
+            gameState.player.x = newX;
+            gameState.player.y = newY;
+
+            if (Math.random() < 0.1) {
+                startWildBattle();
+                return;
+            }
+
+            drawGame();
+        }
+
+        function handleAction() {
+            const direction = gameState.player.direction;
+            let checkX = gameState.player.x;
+            let checkY = gameState.player.y;
+
+            if (direction === 'up') checkY--;
+            else if (direction === 'down') checkY++;
+            else if (direction === 'left') checkX--;
+            else checkX++;
+
+            const npc = npcs.find(n => n.x === checkX && n.y === checkY);
+            if (npc) interactWithNPC(npc);
+        }
+
+        function interactWithNPC(npc) {
+            showDialog(npc.name, npc.dialog, npc.sprite);
+        }
+
+        function showDialog(name, text, sprite) {
+            document.getElementById('dialogNPCName').textContent = name;
+            document.getElementById('dialogNPCImage').src = sprite;
+            document.getElementById('dialogText').textContent = text;
+            document.getElementById('dialogBox').classList.add('active');
+            setTimeout(() => {
+                document.getElementById('dialogBox').classList.remove('active');
+            }, 4000);
+        }
+
+        function startWildBattle() {
+            const wildFreekies = freekiesDB.filter(f => f.rareza !== 'legendario');
+            const selected = wildFreekies[Math.floor(Math.random() * wildFreekies.length)];
+            const wild = JSON.parse(JSON.stringify(selected));
+            wild.nivel = Math.max(3, gameState.party[0].nivel - 2 + Math.floor(Math.random() * 5));
+            wild.currentHP = wild.hp;
+            startBattle(wild, true);
+        }
+
+        function startBattle(enemy, isWild, gym = null) {
+            gameState.battle.active = true;
+            gameState.battle.playerFreekie = gameState.party[0];
+            gameState.battle.enemyFreekie = enemy;
+            gameState.battle.isWild = isWild;
+            gameState.battle.gym = gym;
+            gameState.battle.turn = "player";
+
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('battleScreen').style.display = 'flex';
+            updateBattleDisplay();
+            document.getElementById('battleText').textContent = isWild ? 
+                `¡Apareció un ${enemy.nombre} salvaje!` : 
+                `¡Batalla contra ${gym.lider}!`;
+        }
+
+        function updateBattleDisplay() {
+            const p = gameState.battle.playerFreekie;
+            const e = gameState.battle.enemyFreekie;
+
+            document.getElementById('playerFreekieName').textContent = p.nombre;
+            document.getElementById('playerFreekieLevel').textContent = p.nivel;
+            document.getElementById('playerFreekieHP').textContent = `${p.currentHP}/${p.hp}`;
+            document.getElementById('playerHPBar').style.width = (p.currentHP / p.hp * 100) + '%';
+            document.getElementById('playerFreekieImg').src = p.sprite;
+
+            document.getElementById('enemyFreekieName').textContent = e.nombre;
+            document.getElementById('enemyFreekieLevel').textContent = e.nivel;
+            document.getElementById('enemyFreekieHP').textContent = `${e.currentHP}/${e.hp}`;
+            document.getElementById('enemyHPBar').style.width = (e.currentHP / e.hp * 100) + '%';
+            document.getElementById('enemyFreekieImg').src = e.sprite;
+
+            updateBattleActions();
+        }
+
+        function updateBattleActions() {
+            const div = document.getElementById('battleActions');
+            div.innerHTML = '';
+
+            if (gameState.battle.turn === "player") {
+                gameState.battle.playerFreekie.movimientos.forEach((move, i) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'actionBtn';
+                    btn.textContent = move;
+                    btn.onclick = () => playerAttack(i);
+                    div.appendChild(btn);
+                });
+
+                if (gameState.battle.isWild) {
+                    const catchBtn = document.createElement('button');
+                    catchBtn.className = 'actionBtn';
+                    catchBtn.textContent = '🔴 CAPTURAR';
+                    catchBtn.onclick = attemptCapture;
+                    div.appendChild(catchBtn);
+                }
+
+                const fleeBtn = document.createElement('button');
+                fleeBtn.className = 'actionBtn';
+                fleeBtn.textContent = '🏃 HUIR';
+                fleeBtn.onclick = attemptFlee;
+                div.appendChild(fleeBtn);
+            }
+        }
+
+        function playerAttack(moveIndex) {
+            const p = gameState.battle.playerFreekie;
+            const e = gameState.battle.enemyFreekie;
+            const move = p.movimientos[moveIndex];
+
+            const damage = calculateDamage(p, e, move);
+            e.currentHP = Math.max(0, e.currentHP - damage);
+
+            document.getElementById('playerFreekieSprite').classList.add('attack');
+            setTimeout(() => document.getElementById('playerFreekieSprite').classList.remove('attack'), 500);
+            document.getElementById('enemyFreekieSprite').classList.add('shake');
+            setTimeout(() => document.getElementById('enemyFreekieSprite').classList.remove('shake'), 500);
+
+            showDamageText(damage, 'enemy');
+            updateBattleDisplay();
+
+            document.getElementById('battleText').textContent = `${p.nombre} usó ${move}!`;
+
+            if (e.currentHP <= 0) {
+                setTimeout(enemyDefeated, 1500);
+                return;
+            }
+
+            setTimeout(enemyAttack, 2000);
+        }
+
+        function enemyAttack() {
+            const p = gameState.battle.playerFreekie;
+            const e = gameState.battle.enemyFreekie;
+            const move = e.movimientos[Math.floor(Math.random() * e.movimientos.length)];
+
+            const damage = calculateDamage(e, p, move);
+            p.currentHP = Math.max(0, p.currentHP - damage);
+
+            document.getElementById('enemyFreekieSprite').classList.add('attack');
+            setTimeout(() => document.getElementById('enemyFreekieSprite').classList.remove('attack'), 500);
+            document.getElementById('playerFreekieSprite').classList.add('shake');
+            setTimeout(() => document.getElementById('playerFreekieSprite').classList.remove('shake'), 500);
+
+            showDamageText(damage, 'player');
+            updateBattleDisplay();
+
+            document.getElementById('battleText').textContent = `${e.nombre} usó ${move}!`;
+
+            if (p.currentHP <= 0) {
+                setTimeout(playerDefeated, 1500);
+                return;
+            }
+
+            setTimeout(() => {
+                gameState.battle.turn = "player";
+                document.getElementById('battleText').textContent = "¿Qué debería hacer tu Freekie?";
+                updateBattleActions();
+            }, 2000);
+        }
+
+        function calculateDamage(attacker, defender, move) {
+            const base = Math.floor((2 * attacker.nivel / 5 + 2) * 50 * attacker.ataque / defender.defensa / 50) + 2;
+            const effectiveness = getEffectiveness(attacker.tipo, defender.tipo);
+            const random = 0.85 + Math.random() * 0.15;
+            return Math.floor(base * effectiveness * random);
+        }
+
+        function getEffectiveness(atkType, defType) {
+            const data = typeEffectiveness[atkType];
+            if (!data) return 1;
+            if (data.fuerte.includes(defType)) return 2;
+            if (data.debil.includes(defType)) return 0.5;
+            return 1;
+        }
+
+        function showDamageText(damage, target) {
+            const text = document.createElement('div');
+            text.className = 'damageText';
+            text.textContent = '-' + damage;
+            text.style.left = (target === 'enemy' ? 70 : 30) + '%';
+            text.style.top = '30%';
+            document.getElementById('battleScreen').appendChild(text);
+            setTimeout(() => text.remove(), 1200);
+
+            for (let i = 0; i < 10; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = (target === 'enemy' ? 70 : 30) + '%';
+                particle.style.top = '30%';
+                particle.style.background = ['#FF6B6B', '#4ECDC4', '#FFD93D', '#95E1D3'][Math.floor(Math.random() * 4)];
+                document.getElementById('battleScreen').appendChild(particle);
+                setTimeout(() => particle.remove(), 1000);
+            }
+        }
+
+        function enemyDefeated() {
+            const p = gameState.battle.playerFreekie;
+            const e = gameState.battle.enemyFreekie;
+            document.getElementById('battleText').textContent = `¡${e.nombre} fue derrotado!`;
+
+            const exp = Math.floor(e.nivel * 50);
+            p.exp = (p.exp || 0) + exp;
+
+            if (p.exp >= p.expNext) {
+                levelUp(p);
+            }
+
+            gameState.player.money += Math.floor(e.nivel * 10);
+
+            setTimeout(endBattle, 3000);
+        }
+
+        function playerDefeated() {
+            document.getElementById('battleText').textContent = `¡${gameState.battle.playerFreekie.nombre} fue derrotado!`;
+            setTimeout(() => {
+                endBattle();
+                healParty();
+            }, 3000);
+        }
+
+        function levelUp(freekie) {
+            freekie.nivel++;
+            freekie.exp = 0;
+            freekie.expNext = Math.floor(freekie.expNext * 1.2);
+            freekie.hp += 5;
+            freekie.ataque += 3;
+            freekie.defensa += 3;
+            freekie.velocidad += 3;
+            freekie.currentHP = freekie.hp;
+            alert(`¡${freekie.nombre} subió al nivel ${freekie.nivel}!`);
+        }
+
+        function attemptCapture() {
+            if (gameState.inventory.freekieball <= 0) {
+                alert("¡No tienes Freekieballs!");
+                return;
+            }
+
+            gameState.inventory.freekieball--;
+            const e = gameState.battle.enemyFreekie;
+            const rate = Math.min(0.9, (1 - e.currentHP / e.hp) * 0.7 + 0.1);
+
+            document.getElementById('battleText').textContent = "¡Lanzaste una Freekieball!";
+
+            setTimeout(() => {
+                if (Math.random() < rate) {
+                    e.currentHP = e.hp;
+                    if (gameState.party.length < 6) {
+                        gameState.party.push(e);
+                        alert(`¡Capturaste a ${e.nombre}!`);
+                    } else {
+                        alert("Tu equipo está lleno.");
+                    }
+                    setTimeout(endBattle, 2000);
+                } else {
+                    document.getElementById('battleText').textContent = `¡Oh no! ¡${e.nombre} salió de la Freekieball!`;
+                    setTimeout(enemyAttack, 2000);
+                }
+            }, 2000);
+        }
+
+        function attemptFlee() {
+            if (!gameState.battle.isWild) {
+                alert("¡No puedes huir de una batalla de entrenador!");
+                return;
+            }
+
+            if (Math.random() < 0.7) {
+                document.getElementById('battleText').textContent = "¡Escapaste!";
+                setTimeout(endBattle, 1500);
+            } else {
+                document.getElementById('battleText').textContent = "¡No pudiste escapar!";
+                setTimeout(enemyAttack, 1500);
+            }
+        }
+
+        function endBattle() {
+            gameState.battle.active = false;
+            document.getElementById('battleScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            updatePartyDisplay();
+            drawGame();
+        }
+
+        function updatePartyDisplay() {
+            const display = document.getElementById('partyDisplay');
+            display.innerHTML = '';
+
+            gameState.party.forEach(freekie => {
+                const icon = document.createElement('div');
+                icon.className = 'partyIcon';
+                icon.title = `${freekie.nombre} Nv.${freekie.nivel}`;
+
+                const img = document.createElement('img');
+                img.src = freekie.sprite;
+                icon.appendChild(img);
+
+                const hpBar = document.createElement('div');
+                hpBar.className = 'hpBar';
+                const hpFill = document.createElement('div');
+                hpFill.className = 'hpFill';
+                hpFill.style.width = (freekie.currentHP / freekie.hp * 100) + '%';
+                hpBar.appendChild(hpFill);
+                icon.appendChild(hpBar);
+
+                display.appendChild(icon);
+            });
+
+            document.getElementById('playerMoney').textContent = '💰 ' + gameState.player.money;
+            document.getElementById('playerName').textContent = gameState.player.name;
+        }
+
+        function toggleMainMenu() {
+            document.getElementById('mainMenu').classList.toggle('active');
+        }
+
+        function closeMainMenu() {
+            document.getElementById('mainMenu').classList.remove('active');
+        }
+
+        function showBag() {
+            let content = "🎒 MOCHILA:\n\n";
+            content += `Freekieball: ${gameState.inventory.freekieball}\n`;
+            content += `Superball: ${gameState.inventory.superball}\n`;
+            content += `Ultraball: ${gameState.inventory.ultraball}\n`;
+            content += `Poción: ${gameState.inventory.potion}\n`;
+            content += `Superpoción: ${gameState.inventory.superpotion}\n`;
+            content += `Hiperpoción: ${gameState.inventory.hyperpotion}\n`;
+            content += `Revivir: ${gameState.inventory.revive}\n\n`;
+            content += `Dinero: 💰${gameState.player.money}`;
+            alert(content);
+            closeMainMenu();
+        }
+
+        function showPartyScreen() {
+            document.getElementById('partyScreen').classList.add('active');
+            const list = document.getElementById('partyList');
+            list.innerHTML = '';
+
+            gameState.party.forEach(freekie => {
+                const member = document.createElement('div');
+                member.className = 'partyMember';
+                member.innerHTML = `
+                    <img src="${freekie.sprite}">
+                    <div class="partyMemberInfo">
+                        <h3>${freekie.nombre} (Nv.${freekie.nivel})</h3>
+                        <div class="stats">
+                            <div>Tipo: ${freekie.tipo}</div>
+                            <div>HP: ${freekie.currentHP}/${freekie.hp}</div>
+                            <div>ATQ: ${freekie.ataque}</div>
+                            <div>DEF: ${freekie.defensa}</div>
+                            <div>VEL: ${freekie.velocidad}</div>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(member);
+            });
+            closeMainMenu();
+        }
+
+        function closePartyScreen() {
+            document.getElementById('partyScreen').classList.remove('active');
+        }
+
+        function saveGame() {
+            localStorage.setItem('freekiesWorldSave', JSON.stringify(gameState));
+            alert("¡Partida guardada!");
+            closeMainMenu();
+        }
+
+        function healParty() {
+            document.getElementById('healingScreen').classList.add('active');
+            setTimeout(() => {
+                gameState.party.forEach(f => f.currentHP = f.hp);
+                updatePartyDisplay();
+                document.getElementById('healingScreen').classList.remove('active');
+            }, 3000);
+        }
+
+        function toggleAudio() {
+            gameState.audio.enabled = !gameState.audio.enabled;
+            document.getElementById('audioControl').textContent = gameState.audio.enabled ? '🔊' : '🔇';
+        }
+
+        // CONTROLES
+        document.addEventListener('keydown', (e) => {
+            if (gameState.screen !== 'game') return;
+
+            switch(e.key) {
+                case 'ArrowUp': case 'w': case 'W':
+                    movePlayer(0, -1); e.preventDefault(); break;
+                case 'ArrowDown': case 's': case 'S':
+                    movePlayer(0, 1); e.preventDefault(); break;
+                case 'ArrowLeft': case 'a': case 'A':
+                    movePlayer(-1, 0); e.preventDefault(); break;
+                case 'ArrowRight': case 'd': case 'D':
+                    movePlayer(1, 0); e.preventDefault(); break;
+                case 'Escape': case 'x': case 'X':
+                    toggleMainMenu(); e.preventDefault(); break;
+                case 'Enter': case 'z': case 'Z':
+                    handleAction(); e.preventDefault(); break;
+                case 'h': case 'H':
+                    healParty(); e.preventDefault(); break;
+            }
+        });
+
+        // Mostrar controles en móvil
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+            document.getElementById('controls').style.display = 'grid';
+        }
+
+        console.log("🎮 FREEKIES WORLD ULTIMATE v4.0 - ¡Juego listo!");
+    </script>
+</body>
+</html>
