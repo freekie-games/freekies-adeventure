@@ -870,7 +870,9 @@
             <button class="menuButton" onclick="loadGame()">↻ CARGAR</button>
             <button class="menuButton" onclick="showCredits()">ⓘ CRÉDITOS</button>
         </div>
+<button class="btn" id="startBtn"JUGAR></button>
 
+</button>
         <!-- PANTALLA DE SELECCIÓN -->
         <div id="starterScreen">
             <h2>¡Elige tu Freekie inicial!</h2>
@@ -1066,9 +1068,8 @@
         resizeCanvas();
 
         function startNewGame() {
-        <button class="btn" id="startBtn" onclick="startNewGame(); gtag('event','jugar',{game:'Juego1'})">
-  JUGAR
-</button>
+
+
 
             document.getElementById('titleScreen').style.display = 'none';
             document.getElementById('starterScreen').style.display = 'flex';
@@ -1644,7 +1645,18 @@
             document.getElementById('controls').style.display = 'grid';
         }
 
+
         console.log("🎮 FREEKIES WORLD ULTIMATE v4.0 - ¡Juego listo!");
+        const startBtn = document.getElementById("startBtn");
+
+startBtn.addEventListener("click", () => {
+    // Evento Analytics
+    gtag('event','jugar',{game:'FreekieAdventure'});
+
+    // Llama a la función que inicia el juego
+    startNewGame();
+});
+
     </script>
 </body>
 </html>
