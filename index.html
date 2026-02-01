@@ -1651,7 +1651,11 @@
 
 startBtn.addEventListener("click", () => {
     // Evento Analytics
-    gtag('event','jugar',{game:'FreekieAdventure'});
+    gtag('event', 'jugar', {
+    game: 'FreekieAdventure',
+    debug_mode: true
+});
+
 
     // Llama a la función que inicia el juego
     startNewGame();
@@ -1660,4 +1664,5 @@ startBtn.addEventListener("click", () => {
     </script>
 </body>
 </html>
+
 
