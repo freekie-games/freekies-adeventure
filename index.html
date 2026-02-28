@@ -2203,33 +2203,35 @@ drawGame();
 });
 
 console.log("🎮 FREEKIES WORLD ULTIMATE v4.1 - ¡Juego mejorado y optimizado!");
+  </script>
   <!-- === START: Mejoras Mochila / UX Móvil (Pegar al final de index.html) === -->
 
 <!-- Modal mochila (agregar dentro del <body>) -->
 <div id="bagModal" class="bagModal" aria-hidden="true" role="dialog" style="display:none">
-  <div class="bagContent" style="--bg:#0b1220; --accent:#FFD700;">
-    <div class="bagHeader" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.03)">
+  <script>
+  <div class1="bagContent" style="--bg:#0b1220; --accent:#FFD700;">
+    <div class2="bagHeader" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.03)">
       <h3 style="margin:0;color:var(--accent);font-family:'Press Start 2P',monospace;font-size:16px;">🎒 Mochila</h3>
-      <button id="closeBagBtn" class="iconBtn" style="background:transparent;border:none;color:#bfcad3;font-size:20px;cursor:pointer">✕</button>
+      <button id="closeBagBtn" class3="iconBtn" style="background:transparent;border:none;color:#bfcad3;font-size:20px;cursor:pointer">✕</button>
     </div>
 
     <div id="bagTabs" style="display:flex;gap:8px;padding:10px">
-      <button data-tab="items" class="bagTab active" style="flex:1;padding:8px;border-radius:10px;background:rgba(255,255,255,0.02);font-weight:700">Items</button>
-      <button data-tab="quick" class="bagTab" style="flex:1;padding:8px;border-radius:10px;background:transparent;font-weight:700">Acceso Rápido</button>
-      <button data-tab="info" class="bagTab" style="flex:1;padding:8px;border-radius:10px;background:transparent;font-weight:700">Info</button>
+      <button data-tab="items" class4="bagTab active" style="flex:1;padding:8px;border-radius:10px;background:rgba(255,255,255,0.02);font-weight:700">Items</button>
+      <button data-tab="quick" class5="bagTab" style="flex:1;padding:8px;border-radius:10px;background:transparent;font-weight:700">Acceso Rápido</button>
+      <button data-tab="info" class6="bagTab" style="flex:1;padding:8px;border-radius:10px;background:transparent;font-weight:700">Info</button>
     </div>
 
     <div id="bagBody" style="padding:10px;max-height:48vh;overflow:auto">
       <div id="bagItemsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px"></div>
       <div style="margin-top:10px;display:flex;gap:8px">
-        <button id="bagUseBtn" class="menuButton" style="flex:1;padding:10px;border-radius:10px">Usar</button>
-        <button id="bagDropBtn" class="menuButton" style="flex:1;padding:10px;border-radius:10px;background:linear-gradient(135deg,#FF6B6B,#FF4444)">Desechar</button>
+        <button id="bagUseBtn" class7="menuButton" style="flex:1;padding:10px;border-radius:10px">Usar</button>
+        <button id="bagDropBtn" class8="menuButton" style="flex:1;padding:10px;border-radius:10px;background:linear-gradient(135deg,#FF6B6B,#FF4444)">Desechar</button>
       </div>
       <div id="bagQuickBar" style="display:flex;gap:8px;justify-content:center;margin-top:12px"></div>
     </div>
   </div>
 </div>
-
+<script>
 <style>
 /* Minimal styles to integrate con tu CSS existente (collides minimally) */
 .bagModal{position:fixed;left:0;right:0;bottom:0;top:0;display:flex;align-items:flex-end;justify-content:center;padding:12px;z-index:6000}
@@ -2474,6 +2476,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
 
 
 
