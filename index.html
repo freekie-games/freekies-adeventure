@@ -2453,8 +2453,28 @@ console.log("🎮 FREEKIES WORLD ULTIMATE v4.1 - ¡Juego mejorado y optimizado!"
 
 <!-- === END: Mejoras Mochila / UX Móvil === -->
 </script>
+  <script>
+// 🔥 FIX BOTÓN JUGAR
+
+document.addEventListener("DOMContentLoaded", () => {
+  const playBtn = document.getElementById("playBtn");
+  if (playBtn) {
+    playBtn.onclick = function () {
+      const startScreen = document.getElementById("startScreen");
+      if (startScreen) startScreen.style.display = "none";
+
+      if (typeof initGame === "function") {
+        initGame();
+      } else if (typeof gameLoop === "function") {
+        gameLoop();
+      }
+    };
+  }
+});
+</script>
 </body>
 </html>
+
 
 
 
