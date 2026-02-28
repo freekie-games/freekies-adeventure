@@ -2203,8 +2203,258 @@ drawGame();
 });
 
 console.log("🎮 FREEKIES WORLD ULTIMATE v4.1 - ¡Juego mejorado y optimizado!");
+  <!-- === START: Mejoras Mochila / UX Móvil (Pegar al final de index.html) === -->
+
+<!-- Modal mochila (agregar dentro del <body>) -->
+<div id="bagModal" class="bagModal" aria-hidden="true" role="dialog" style="display:none">
+  <div class="bagContent" style="--bg:#0b1220; --accent:#FFD700;">
+    <div class="bagHeader" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.03)">
+      <h3 style="margin:0;color:var(--accent);font-family:'Press Start 2P',monospace;font-size:16px;">🎒 Mochila</h3>
+      <button id="closeBagBtn" class="iconBtn" style="background:transparent;border:none;color:#bfcad3;font-size:20px;cursor:pointer">✕</button>
+    </div>
+
+    <div id="bagTabs" style="display:flex;gap:8px;padding:10px">
+      <button data-tab="items" class="bagTab active" style="flex:1;padding:8px;border-radius:10px;background:rgba(255,255,255,0.02);font-weight:700">Items</button>
+      <button data-tab="quick" class="bagTab" style="flex:1;padding:8px;border-radius:10px;background:transparent;font-weight:700">Acceso Rápido</button>
+      <button data-tab="info" class="bagTab" style="flex:1;padding:8px;border-radius:10px;background:transparent;font-weight:700">Info</button>
+    </div>
+
+    <div id="bagBody" style="padding:10px;max-height:48vh;overflow:auto">
+      <div id="bagItemsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px"></div>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button id="bagUseBtn" class="menuButton" style="flex:1;padding:10px;border-radius:10px">Usar</button>
+        <button id="bagDropBtn" class="menuButton" style="flex:1;padding:10px;border-radius:10px;background:linear-gradient(135deg,#FF6B6B,#FF4444)">Desechar</button>
+      </div>
+      <div id="bagQuickBar" style="display:flex;gap:8px;justify-content:center;margin-top:12px"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Minimal styles to integrate con tu CSS existente (collides minimally) */
+.bagModal{position:fixed;left:0;right:0;bottom:0;top:0;display:flex;align-items:flex-end;justify-content:center;padding:12px;z-index:6000}
+.bagContent{width:100%;max-width:720px;border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);backdrop-filter:blur(6px)}
+.bagTab.active{background:linear-gradient(135deg,#112233,#163046);color:var(--accent)}
+.itemCard{background:rgba(255,255,255,0.02);border-radius:10px;padding:8px;text-align:center;cursor:pointer;border:1px solid rgba(255,255,255,0.02);user-select:none}
+.itemCard img{width:48px;height:48px;object-fit:contain;image-rendering:pixelated;display:block;margin:0 auto 6px}
+.itemName{font-size:12px;color:#dfe9f3}
+.itemCount{font-size:12px;color:#9aa5b1;margin-top:4px}
+.itemSelected{outline:3px solid rgba(255,215,0,0.12);box-shadow:0 6px 30px rgba(255,215,0,0.04)}
+@media (max-width:480px){
+  .bagContent{padding:6px}
+  .itemCard img{width:40px;height:40px}
+  #bagItemsGrid{grid-template-columns:repeat(4,1fr)}
+}
+</style>
+
+<script>
+/* === JS: Mochila móvil y mejoras UX touch ===
+   - Sobrescribe showBag() antiguo para mostrar modal (reemplaza alert)
+   - Soporta usar, desechar, quickbar, persistencia en localStorage
+   - Touch: long-press para usar item
+*/
+
+(function(){
+  // Si gameState no existe, no hacemos nada
+  if (typeof window.gameState === 'undefined') window.gameState = window.gameState || { inventory: {} };
+
+  // Item meta (iconos opcionales; puedes usar tus sprites)
+  const itemMeta = {
+    freekieball: { name: "Freekieball", icon: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" },
+    superball:  { name: "Superball",  icon: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/great-ball.png" },
+    ultraball:  { name: "Ultraball",  icon: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ultra-ball.png" },
+    potion:     { name: "Poción",     icon: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/potion.png" },
+    superpotion:{ name: "Súperpoción",icon: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/super-potion.png" },
+    hyperpotion:{ name: "Hiperpoción",icon: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/hyper-potion.png" },
+    revive:     { name: "Revivir",    icon: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/revive.png" }
+  };
+
+  // Elementos
+  const bagModal = document.getElementById('bagModal');
+  const bagItemsGrid = document.getElementById('bagItemsGrid');
+  const bagQuickBar = document.getElementById('bagQuickBar');
+  const closeBagBtn = document.getElementById('closeBagBtn');
+  const bagUseBtn = document.getElementById('bagUseBtn');
+  const bagDropBtn = document.getElementById('bagDropBtn');
+  const tabs = document.querySelectorAll('.bagTab');
+
+  // Estado local
+  let selectedKey = null;
+  window.gameState.quickBar = window.gameState.quickBar || ['potion','freekieball','superball'];
+
+  // Utilities
+  function persist() {
+    try { localStorage.setItem('freekies_bag', JSON.stringify({ inventory: gameState.inventory, quickBar: gameState.quickBar })); } catch(e){}
+  }
+  function loadPersist() {
+    try {
+      const raw = JSON.parse(localStorage.getItem('freekies_bag'));
+      if (raw && raw.inventory) gameState.inventory = Object.assign({}, gameState.inventory, raw.inventory);
+      if (raw && raw.quickBar) gameState.quickBar = raw.quickBar;
+    } catch(e){}
+  }
+
+  // Render
+  function renderBag() {
+    bagItemsGrid.innerHTML = '';
+    const invKeys = Object.keys(gameState.inventory || {});
+    if (invKeys.length === 0) {
+      bagItemsGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#9aa5b1;padding:12px">No tienes items</div>';
+      renderQuickBar();
+      return;
+    }
+    invKeys.forEach(key => {
+      const count = gameState.inventory[key] || 0;
+      const meta = itemMeta[key] || { name: key, icon: '' };
+      const el = document.createElement('div');
+      el.className = 'itemCard';
+      el.dataset.key = key;
+      el.innerHTML = `<img src="${meta.icon}" alt="${meta.name}"><div class="itemName">${meta.name}</div><div class="itemCount">x${count}</div>`;
+      el.addEventListener('click', ()=> selectItem(key, el));
+      // Long-press to use (mobile)
+      let pressTimer = null;
+      el.addEventListener('touchstart', (ev)=> {
+        pressTimer = setTimeout(()=> { useItem(key); flash(el); }, 600);
+      }, {passive:true});
+      el.addEventListener('touchend', ()=> { if (pressTimer) clearTimeout(pressTimer); }, {passive:true});
+      bagItemsGrid.appendChild(el);
+    });
+    renderQuickBar();
+  }
+
+  function renderQuickBar() {
+    bagQuickBar.innerHTML = '';
+    (gameState.quickBar || []).forEach(key => {
+      const meta = itemMeta[key] || { name:key, icon: '' };
+      const slot = document.createElement('div');
+      slot.className = 'quickSlot';
+      slot.style = "width:56px;height:56px;border-radius:12px;background:rgba(255,255,255,0.02);display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,255,255,0.03)";
+      slot.dataset.key = key;
+      slot.innerHTML = meta.icon ? `<img src="${meta.icon}" alt="${meta.name}" style="width:40px;height:40px">` : meta.name;
+      slot.addEventListener('click', ()=> useItem(key));
+      bagQuickBar.appendChild(slot);
+    });
+  }
+
+  function selectItem(key, el) {
+    selectedKey = key;
+    document.querySelectorAll('.itemCard').forEach(c => c.classList.remove('itemSelected'));
+    if (el) el.classList.add('itemSelected');
+  }
+
+  function flash(el) {
+    el.classList.add('itemSelected');
+    setTimeout(()=> el.classList.remove('itemSelected'), 350);
+  }
+
+  function useItem(key) {
+    if (!key) { toast('Selecciona un item'); return; }
+    const count = gameState.inventory[key] || 0;
+    if (count <= 0) { toast('No tienes ' + (itemMeta[key]?.name || key)); return; }
+    // Lógica mínima: consumir item y aplicar efecto simple (curar si es poción)
+    gameState.inventory[key] = Math.max(0, count - 1);
+    // ejemplo de efecto: si es potion -> curar primer freekie
+    if (key === 'potion' || key === 'superpotion' || key === 'hyperpotion') {
+      if (gameState.party && gameState.party[0]) {
+        const target = gameState.party[0];
+        target.currentHP = Math.min(target.hp, (target.currentHP||target.hp) + (key === 'potion' ? 20 : key==='superpotion'?50:120));
+        updatePartyDisplay && updatePartyDisplay(); // si existe, actualiza UI principal
+      }
+    }
+    persist();
+    renderBag();
+    toast((itemMeta[key]?.name || key) + ' usado');
+  }
+
+  function dropItem(key, amount=1) {
+    if (!key) { toast('Selecciona un item'); return; }
+    gameState.inventory[key] = Math.max(0, (gameState.inventory[key]||0) - amount);
+    persist(); renderBag(); toast((itemMeta[key]?.name || key) + ' desechado');
+  }
+
+  // Small toast helper
+  function toast(msg, t=1200) {
+    let el = document.getElementById('bagToast');
+    if (!el) {
+      el = document.createElement('div'); el.id='bagToast';
+      el.style = 'position:fixed;left:50%;transform:translateX(-50%);bottom:90px;background:#0b1220;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);color:#9aa5b1;z-index:7000';
+      document.body.appendChild(el);
+    }
+    el.textContent = msg; el.style.display = 'block';
+    clearTimeout(el._timeout);
+    el._timeout = setTimeout(()=> el.style.display='none', t);
+  }
+
+  // Open/close UI
+  function openBagModal() {
+    loadPersist();
+    renderBag();
+    bagModal.style.display = 'flex';
+    bagModal.setAttribute('aria-hidden','false');
+  }
+  function closeBagModal() {
+    bagModal.style.display = 'none';
+    bagModal.setAttribute('aria-hidden','true');
+  }
+
+  // Replace existing showBag (override earlier function)
+  window.showBag = function() { openBagModal(); closeMainMenu && closeMainMenu(); };
+
+  // Attach events
+  closeBagBtn && closeBagBtn.addEventListener('click', closeBagModal);
+  bagUseBtn && bagUseBtn.addEventListener('click', ()=> useItem(selectedKey));
+  bagDropBtn && bagDropBtn.addEventListener('click', ()=> dropItem(selectedKey,1));
+  tabs.forEach(t => t.addEventListener('click', (ev)=>{
+    tabs.forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    const which = t.dataset.tab;
+    if (which === 'quick') { bagItemsGrid.style.display='none'; bagQuickBar.style.display='flex'; }
+    else { bagItemsGrid.style.display='grid'; bagQuickBar.style.display='flex'; }
+  }));
+
+  // Gestos móviles básicos: doble-tap en canvas para abrir mochila, swipe para moverse
+  (function attachMobileGestures(){
+    const canvas = document.getElementById('gameCanvas');
+    if (!canvas) return;
+    let lastTap = 0, startX=0, startY=0, touchStartTime=0;
+    canvas.addEventListener('touchstart', (e)=> {
+      const t = e.touches[0];
+      const now = Date.now();
+      if (now - lastTap < 300) { openBagModal(); }
+      lastTap = now;
+      startX = t.clientX; startY = t.clientY; touchStartTime = now;
+    }, {passive:true});
+    canvas.addEventListener('touchend', (e)=> {
+      const t = e.changedTouches[0];
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+      const dt = Date.now() - touchStartTime;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+        if (dx > 0) movePlayer && movePlayer(1,0);
+        else movePlayer && movePlayer(-1,0);
+      } else if (Math.abs(dy) > 40 && Math.abs(dy) > Math.abs(dx)) {
+        if (dy > 0) movePlayer && movePlayer(0,1);
+        else movePlayer && movePlayer(0,-1);
+      } else {
+        // tap -> action
+        handleAction && handleAction();
+      }
+    }, {passive:true});
+  })();
+
+  // Init load
+  loadPersist();
+
+  // Expose helpers (opcional)
+  window._bag = { open: openBagModal, close: closeBagModal, useItem, dropItem, render: renderBag };
+
+})();
+</script>
+
+<!-- === END: Mejoras Mochila / UX Móvil === -->
 </script>
 </body>
 </html>
+
 
 
