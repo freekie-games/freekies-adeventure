@@ -2473,9 +2473,716 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 });
+    ```javascript
+/* ===== MEJORAS AAA V10.0 ===== 
+   Efectos visuales avanzados, partículas, animaciones, feedback mejorado
+   Sistema de logros, combos, críticos, y optimizaciones de rendimiento
+   TODO ENCAPSULADO - NO MODIFICA CÓDIGO EXISTENTE
+*/
+
+(function AAA_ENHANCEMENT_V10() {
+  'use strict';
+  
+  // ===== SISTEMA DE PARTÍCULAS =====
+  const ParticleSystem = {
+    particles: [],
+    maxParticles: 150,
+    canvas: null,
+    ctx: null,
+    
+    init(gameCanvas) {
+      this.canvas = gameCanvas;
+      this.ctx = gameCanvas.getContext('2d');
+      this.particles = [];
+      requestAnimationFrame(() => this.render());
+    },
+    
+    emit(x, y, type = 'spark', count = 8) {
+      for (let i = 0; i < count; i++) {
+        if (this.particles.length >= this.maxParticles) this.particles.shift();
+        
+        const angle = (Math.PI * 2 * i) / count;
+        const velocity = 3 + Math.random() * 4;
+        
+        const particle = {
+          x, y,
+          vx: Math.cos(angle) * velocity,
+          vy: Math.sin(angle) * velocity,
+          life: 1,
+          decay: 0.015 + Math.random() * 0.01,
+          type,
+          gravity: type === 'smoke' ? 0.05 : 0.15,
+          size: type === 'spark' ? 3 : 5,
+          color: this.getColor(type)
+        };
+        
+        this.particles.push(particle);
+      }
+    },
+    
+    getColor(type) {
+      const colors = {
+        spark: `hsl(${Math.random() * 60 + 30}, 100%, 60%)`,
+        heal: '#95E1D3',
+        damage: '#FF6B6B',
+        critical: '#FFD700',
+        smoke: 'rgba(200, 200, 200, 0.6)'
+      };
+      return colors[type] || colors.spark;
+    },
+    
+    update() {
+      this.particles = this.particles.filter(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += p.gravity;
+        p.life -= p.decay;
+        return p.life > 0;
+      });
+    },
+    
+    render() {
+      this.update();
+      
+      this.particles.forEach(p => {
+        this.ctx.save();
+        this.ctx.globalAlpha = p.life * 0.8;
+        this.ctx.fillStyle = p.color;
+        this.ctx.beginPath();
+        this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.restore();
+      });
+      
+      requestAnimationFrame(() => this.render());
+    }
+  };
+  
+  // ===== SISTEMA DE EFECTOS DE PANTALLA =====
+  const ScreenEffects = {
+    canvas: null,
+    ctx: null,
+    shakeIntensity: 0,
+    shakeDecay: 0.95,
+    flashAlpha: 0,
+    flashColor: 'white',
+    
+    init(gameCanvas) {
+      this.canvas = gameCanvas;
+      this.ctx = gameCanvas.getContext('2d');
+      this.update();
+    },
+    
+    shake(intensity = 10, duration = 200) {
+      this.shakeIntensity = intensity;
+      setTimeout(() => { this.shakeIntensity = 0; }, duration);
+    },
+    
+    flash(color = 'white', duration = 100) {
+      this.flashColor = color;
+      this.flashAlpha = 0.6;
+      setTimeout(() => { this.flashAlpha = 0; }, duration);
+    },
+    
+    getShakeOffset() {
+      if (this.shakeIntensity <= 0.1) {
+        this.shakeIntensity = 0;
+        return { x: 0, y: 0 };
+      }
+      
+      this.shakeIntensity *= this.shakeDecay;
+      return {
+        x: (Math.random() - 0.5) * this.shakeIntensity,
+        y: (Math.random() - 0.5) * this.shakeIntensity
+      };
+    },
+    
+    update() {
+      if (this.flashAlpha > 0) {
+        this.ctx.save();
+        this.ctx.fillStyle = this.flashColor;
+        this.ctx.globalAlpha = this.flashAlpha;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.restore();
+        this.flashAlpha -= 0.05;
+      }
+      
+      requestAnimationFrame(() => this.update());
+    }
+  };
+  
+  // ===== SISTEMA DE LOGROS =====
+  const AchievementSystem = {
+    achievements: {
+      firstVictory: { name: '¡Primera Victoria!', desc: 'Gana tu primera batalla', unlocked: false },
+      hatTrick: { name: 'Hat Trick', desc: 'Gana 3 batallas seguidas sin perder', unlocked: false },
+      criticalMaster: { name: 'Crítico Maestro', desc: 'Realiza 10 golpes críticos', unlocked: false },
+      levelUp20: { name: 'Experto', desc: 'Lleva un Freekie a nivel 20', unlocked: false },
+      comboKing: { name: 'Combo King', desc: 'Consigue un combo de 5+', unlocked: false },
+      treasureHunter: { name: 'Cazador de Tesoros', desc: 'Abre 20 cofres', unlocked: false },
+      speedRunner: { name: 'Corredor Rápido', desc: 'Gana una batalla en menos de 30 segundos', unlocked: false },
+      fullParty: { name: 'Equipo Completo', desc: 'Captura 6 Freekies diferentes', unlocked: false }
+    },
+    
+    stats: {
+      victories: 0,
+      winStreak: 0,
+      criticals: 0,
+      combos: 0,
+      chestOpened: 0,
+      captureCount: 0,
+      maxLevel: 1
+    },
+    
+    init() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('freekies_achievements'));
+        if (saved) {
+          Object.assign(this.achievements, saved.achievements);
+          Object.assign(this.stats, saved.stats);
+        }
+      } catch(e) {}
+    },
+    
+    unlock(key) {
+      if (this.achievements[key] && !this.achievements[key].unlocked) {
+        this.achievements[key].unlocked = true;
+        this.showNotification(this.achievements[key]);
+        this.save();
+      }
+    },
+    
+    addStat(key, value = 1) {
+      if (this.stats.hasOwnProperty(key)) {
+        this.stats[key] += value;
+        this.checkAchievements();
+        this.save();
+      }
+    },
+    
+    setStat(key, value) {
+      if (this.stats.hasOwnProperty(key)) {
+        this.stats[key] = Math.max(this.stats[key], value);
+        this.checkAchievements();
+        this.save();
+      }
+    },
+    
+    checkAchievements() {
+      if (this.stats.victories === 1) this.unlock('firstVictory');
+      if (this.stats.winStreak >= 3) this.unlock('hatTrick');
+      if (this.stats.criticals >= 10) this.unlock('criticalMaster');
+      if (this.stats.maxLevel >= 20) this.unlock('levelUp20');
+      if (this.stats.combos >= 5) this.unlock('comboKing');
+      if (this.stats.chestOpened >= 20) this.unlock('treasureHunter');
+      if (this.stats.captureCount >= 6) this.unlock('fullParty');
+    },
+    
+    showNotification(achievement) {
+      const notif = document.createElement('div');
+      notif.style = `
+        position: fixed; top: 20px; right: 20px; z-index: 9999;
+        background: linear-gradient(135deg, #FFD700, #FFA500);
+        color: #1a1a2e; padding: 20px 30px;
+        border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        font-family: 'Press Start 2P', monospace; font-size: 12px;
+        text-align: center; max-width: 300px;
+        animation: slideInRight 0.5s ease-out;
+      `;
+      notif.innerHTML = `
+        <div style="font-weight: bold; margin-bottom: 5px;">🏆 LOGRO DESBLOQUEADO</div>
+        <div style="font-size: 14px; font-weight: bold;">${achievement.name}</div>
+        <div style="font-size: 10px; margin-top: 5px; opacity: 0.8;">${achievement.desc}</div>
+      `;
+      document.body.appendChild(notif);
+      
+      setTimeout(() => {
+        notif.style.animation = 'slideOutRight 0.5s ease-in';
+        setTimeout(() => notif.remove(), 500);
+      }, 3000);
+    },
+    
+    save() {
+      try {
+        localStorage.setItem('freekies_achievements', JSON.stringify({
+          achievements: this.achievements,
+          stats: this.stats
+        }));
+      } catch(e) {}
+    }
+  };
+  
+  // ===== SISTEMA DE COMBOS =====
+  const ComboSystem = {
+    comboCount: 0,
+    comboTimer: null,
+    comboDisplay: null,
+    
+    init() {
+      const display = document.createElement('div');
+      display.id = 'comboDisplay';
+      display.style = `
+        position: absolute; top: 100px; left: 50%; transform: translateX(-50%);
+        font-family: 'Press Start 2P', monospace; font-size: 32px;
+        color: #FFD700; text-shadow: 0 0 20px #FFD700;
+        opacity: 0; pointer-events: none; z-index: 500;
+        animation: comboFloat 0.8s ease-out forwards;
+      `;
+      document.getElementById('gameScreen')?.appendChild(display);
+      this.comboDisplay = display;
+    },
+    
+    hit() {
+      this.comboCount++;
+      this.updateDisplay();
+      
+      clearTimeout(this.comboTimer);
+      this.comboTimer = setTimeout(() => {
+        if (this.comboCount > 1) {
+          AchievementSystem.setStat('combos', this.comboCount);
+        }
+        this.reset();
+      }, 3000);
+    },
+    
+    updateDisplay() {
+      if (this.comboDisplay) {
+        this.comboDisplay.textContent = `COMBO x${this.comboCount}`;
+        this.comboDisplay.style.animation = 'none';
+        setTimeout(() => {
+          this.comboDisplay.style.animation = 'comboFloat 0.8s ease-out forwards';
+        }, 10);
+      }
+    },
+    
+    reset() {
+      this.comboCount = 0;
+      if (this.comboDisplay) {
+        this.comboDisplay.style.opacity = '0';
+      }
+    }
+  };
+  
+  // ===== ENHANCED DAMAGE NUMBERS =====
+  const DamageNumbers = {
+    active: [],
+    
+    show(x, y, damage, isCritical = false) {
+      const num = document.createElement('div');
+      num.textContent = isCritical ? `${damage}!` : `${damage}`;
+      num.style = `
+        position: absolute; left: ${x}px; top: ${y}px;
+        font-family: 'Press Start 2P', monospace; font-size: ${isCritical ? 24 : 16}px;
+        color: ${isCritical ? '#FFD700' : '#FF6B6B'};
+        text-shadow: ${isCritical ? '0 0 10px #FFD700' : '0 0 5px #FF0000'};
+        font-weight: bold; pointer-events: none; z-index: 1000;
+        animation: ${isCritical ? 'criticalFloat' : 'damageFloat'} 1s ease-out forwards;
+      `;
+      
+      document.getElementById('gameScreen')?.appendChild(num);
+      this.active.push(num);
+      
+      setTimeout(() => {
+        num.remove();
+        this.active = this.active.filter(n => n !== num);
+      }, 1000);
+    }
+  };
+  
+  // ===== ENHANCED VISUAL EFFECTS =====
+  const VisualEffects = {
+    addGlow(element, color = '#FF6B6B', size = 10) {
+      element.style.boxShadow = `0 0 ${size}px ${color}, inset 0 0 ${size}px ${color}`;
+    },
+    
+    removeGlow(element) {
+      element.style.boxShadow = '';
+    },
+    
+    pulse(element, duration = 300) {
+      element.style.animation = `pulse ${duration}ms ease-in-out`;
+      setTimeout(() => {
+        element.style.animation = '';
+      }, duration);
+    },
+    
+    scale(element, fromScale = 1.2, toScale = 1, duration = 300) {
+      element.style.transform = `scale(${fromScale})`;
+      element.style.transition = `transform ${duration}ms cubic-bezier(0.34, 1.56, 0.64, 1)`;
+      
+      requestAnimationFrame(() => {
+        element.style.transform = `scale(${toScale})`;
+      });
+      
+      setTimeout(() => {
+        element.style.transition = '';
+      }, duration);
+    }
+  };
+  
+  // ===== OPTIMIZER & SMOOTHING =====
+  const PerformanceOptimizer = {
+    lastFrameTime: 0,
+    fps: 60,
+    deltaTime: 0,
+    
+    update() {
+      const now = performance.now();
+      this.deltaTime = (now - this.lastFrameTime) / 1000;
+      this.lastFrameTime = now;
+      
+      if (this.deltaTime > 0.016) {
+        this.fps = Math.round(1 / this.deltaTime);
+      }
+    },
+    
+    getSmoothedValue(current, target, smoothness = 0.1) {
+      return current + (target - current) * Math.min(smoothness, this.deltaTime * 5);
+    }
+  };
+  
+  // ===== ENHANCED AUDIO SYSTEM =====
+  const AudioEnhancer = {
+    audioContext: null,
+    gainNode: null,
+    enabled: true,
+    
+    init() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        this.audioContext = new AudioContext();
+        this.gainNode = this.audioContext.createGain();
+        this.gainNode.connect(this.audioContext.destination);
+        this.gainNode.gain.value = 0.3;
+      } catch(e) {
+        console.log('Audio context not available');
+      }
+    },
+    
+    playTone(frequency = 440, duration = 100, type = 'sine') {
+      if (!this.audioContext) return;
+      
+      const oscillator = this.audioContext.createOscillator();
+      const envelope = this.audioContext.createGain();
+      
+      oscillator.connect(envelope);
+      envelope.connect(this.gainNode);
+      
+      oscillator.type = type;
+      oscillator.frequency.value = frequency;
+      
+      envelope.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+      envelope.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration / 1000);
+      
+      oscillator.start(this.audioContext.currentTime);
+      oscillator.stop(this.audioContext.currentTime + duration / 1000);
+    },
+    
+    playCritical() {
+      this.playTone(800, 150, 'sine');
+      setTimeout(() => this.playTone(1000, 100, 'sine'), 75);
+    },
+    
+    playDamage() {
+      this.playTone(200, 50, 'square');
+    },
+    
+    playHeal() {
+      this.playTone(600, 100, 'sine');
+      setTimeout(() => this.playTone(800, 100, 'sine'), 50);
+    }
+  };
+  
+  // ===== CSS ANIMATIONS INJECTION =====
+  function injectAnimations() {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-30px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      @keyframes slideInRight {
+        from { opacity: 0; transform: translateX(100px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+      
+      @keyframes slideOutRight {
+        from { opacity: 1; transform: translateX(0); }
+        to { opacity: 0; transform: translateX(100px); }
+      }
+      
+      @keyframes damageFloat {
+        0% { opacity: 1; transform: translateY(0) scale(1); }
+        100% { opacity: 0; transform: translateY(-60px) scale(0.8); }
+      }
+      
+      @keyframes criticalFloat {
+        0% { opacity: 1; transform: translateY(0) scale(1.2); }
+        50% { transform: translateY(-30px) scale(1.3); }
+        100% { opacity: 0; transform: translateY(-80px) scale(0.9); }
+      }
+      
+      @keyframes comboFloat {
+        0% { opacity: 1; transform: translateX(-50%) scale(0.5); }
+        50% { transform: translateX(-50%) scale(1.1); }
+        100% { opacity: 0; transform: translateX(-50%) scale(1); }
+      }
+      
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+      }
+      
+      @keyframes pixelBounce {
+        0%, 100% { transform: translateY(0); }
+        25% { transform: translateY(-8px); }
+        50% { transform: translateY(0); }
+        75% { transform: translateY(-4px); }
+      }
+      
+      @keyframes glitch {
+        0% { clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%); }
+        25% { clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%); }
+        50% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+        75% { clip-path: polygon(0 10%, 100% 10%, 100% 80%, 0 80%); }
+        100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+      }
+      
+      @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+      }
+      
+      @keyframes glow {
+        0%, 100% { text-shadow: 0 0 10px currentColor; }
+        50% { text-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
+      }
+      
+      .enhanced-button {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+      }
+      
+      .enhanced-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: left 0.5s ease;
+        z-index: -1;
+      }
+      
+      .enhanced-button:hover::before {
+        left: 100%;
+      }
+      
+      .card-tilt {
+        perspective: 1000px;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      
+      .card-tilt:hover {
+        transform: rotateY(5deg) rotateX(-5deg);
+      }
+      
+      #gameUI {
+        backdrop-filter: blur(8px);
+      }
+      
+      @supports not (backdrop-filter: blur(8px)) {
+        #gameUI {
+          background: rgba(0, 0, 0, 0.8);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  // ===== INTEGRATION WITH BATTLE SYSTEM =====
+  function hookBattleSystem() {
+    const originalDealDamage = window.dealDamage;
+    if (originalDealDamage) {
+      window.dealDamage = function(attacker, defender, damage, isCritical = false) {
+        // Call original
+        const result = originalDealDamage.call(this, attacker, defender, damage, isCritical);
+        
+        // Add visual enhancements
+        if (isCritical) {
+          AudioEnhancer.playCritical();
+          AchievementSystem.addStat('criticals');
+          ComboSystem.hit();
+          
+          const defenderElement = document.querySelector('[data-defender]');
+          if (defenderElement) {
+            VisualEffects.pulse(defenderElement, 200);
+            ScreenEffects.flash('#FFD700', 150);
+            ParticleSystem.emit(
+              defenderElement.offsetLeft + 50,
+              defenderElement.offsetTop + 50,
+              'critical',
+              12
+            );
+          }
+        } else {
+          AudioEnhancer.playDamage();
+          ComboSystem.hit();
+          ParticleSystem.emit(
+            Math.random() * window.innerWidth,
+            Math.random() * window.innerHeight * 0.6,
+            'damage',
+            5
+          );
+        }
+        
+        DamageNumbers.show(
+          Math.random() * 200 + 100,
+          Math.random() * 100 + 50,
+          damage,
+          isCritical
+        );
+        
+        ScreenEffects.shake(isCritical ? 15 : 8);
+        return result;
+      };
+    }
+  }
+  
+  // ===== INITIALIZATION =====
+  function initialize() {
+    injectAnimations();
+    AchievementSystem.init();
+    AudioEnhancer.init();
+    
+    // Wait for canvas
+    const waitForCanvas = setInterval(() => {
+      const gameCanvas = document.getElementById('gameCanvas');
+      if (gameCanvas) {
+        clearInterval(waitForCanvas);
+        ParticleSystem.init(gameCanvas);
+        ScreenEffects.init(gameCanvas);
+        ComboSystem.init();
+        hookBattleSystem();
+        
+        // Smooth canvas rendering
+        const ctx = gameCanvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+      }
+    }, 100);
+    
+    // Global access
+    window.AAA = {
+      particles: ParticleSystem,
+      effects: ScreenEffects,
+      visual: VisualEffects,
+      audio: AudioEnhancer,
+      combo: ComboSystem,
+      achievements: AchievementSystem,
+      damage: DamageNumbers
+    };
+  }
+  
+  // Start when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialize);
+  } else {
+    initialize();
+  }
+})();
+
+/* ===== QUALITY OF LIFE IMPROVEMENTS ===== */
+(function QOL() {
+  'use strict';
+  
+  // Smooth transitions for UI elements
+  document.addEventListener('DOMContentLoaded', () => {
+    const style = document.createElement('style');
+    style.textContent = `
+      * {
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      #gameUI > div {
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+      
+      .menuButton {
+        transform-origin: center;
+        will-change: transform;
+      }
+      
+      #gameCanvas {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+      }
+      
+      /* Mobile improvements */
+      @media (max-width: 768px) {
+        .menuButton {
+          min-height: 60px;
+          font-size: 14px;
+          padding: 15px 20px;
+        }
+        
+        * {
+          -webkit-user-select: none;
+          user-select: none;
+        }
+        
+        button, a {
+          -webkit-user-select: none;
+          user-select: none;
+        }
+      }
+      
+      /* Prevent layout shift */
+      html {
+        scrollbar-gutter: stable;
+      }
+      
+      /* Smooth scrolling */
+      html {
+        scroll-behavior: smooth;
+      }
+      
+      /* Better focus states */
+      button:focus-visible {
+        outline: 3px solid #FFD700;
+        outline-offset: 2px;
+      }
+      
+      /* Reduce motion for accessibility */
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  });
+})();
+```
 </script>
 </body>
 </html>
+
 
 
 
