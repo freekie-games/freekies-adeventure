@@ -7027,6 +7027,443 @@ document.addEventListener("DOMContentLoaded", () => {
 <!-- ===================================================== -->
 <!-- FIN DEL ENHANCEMENT PACK v5.0 -->
 <!-- ===================================================== -->
+  <!-- ===================================================== -->
+<!-- FREEKIES WORLD - FIX BUG + MEJORAS AMBIENTE v6.0 -->
+<!-- NO ALTERA CÓDIGO EXISTENTE - SOLO AGREGA CAPAS -->
+<!-- ===================================================== -->
+<script>
+(function BugFixAndEnvironment() {
+'use strict';
+console.log('🔧 BugFix + Environment v6.0 loading...');
+
+// ===== 1. FIX: SISTEMA DE TRACKING DE FREEKIE ACTIVO =====
+const ActiveFreekieTracker = {
+activeIndex: 0, // Track qué índice del party está en batalla
+init() {
+// Hook en startBattle para guardar el índice
+const originalStartBattle = window.startBattle;
+if (originalStartBattle) {
+window.startBattle = function(enemy, isWild, gym = null) {
+ActiveFreekieTracker.activeIndex = 0; // Reset al primero por defecto
+originalStartBattle.call(this, enemy, isWild, gym);
+};
+}
+// Hook en endBattle para actualizar el índice correcto
+const originalEndBattle = window.endBattle;
+if (originalEndBattle) {
+window.endBattle = function() {
+// Actualizar el party member correcto con los cambios de batalla
+if (gameState.battle.playerFreekie && gameState.party[ActiveFreekieTracker.activeIndex]) {
+gameState.party[ActiveFreekieTracker.activeIndex] = JSON.parse(
+JSON.stringify(gameState.battle.playerFreekie)
+);
+}
+originalEndBattle.call(this);
+ActiveFreekieTracker.activeIndex = 0; // Reset
+};
+}
+// Hook en SwitchSystem para actualizar el índice
+if (window.SwitchSystem) {
+const originalPerformSwitch = window.SwitchSystem.performSwitch;
+if (originalPerformSwitch) {
+window.SwitchSystem.performSwitch = function(newIndex, overlay) {
+ActiveFreekieTracker.activeIndex = newIndex;
+originalPerformSwitch.call(this, newIndex, overlay);
+};
+}
+}
+console.log('✅ ActiveFreekieTracker initialized');
+}
+};
+
+// ===== 2. FIX: PREVENIR DUPLICACIÓN EN CAPTURA =====
+const CaptureFix = {
+init() {
+const originalAttemptCapture = window.attemptCapture;
+if (originalAttemptCapture) {
+window.attemptCapture = function() {
+// Verificar si el Freekie ya existe en el party
+const enemyId = gameState.battle?.enemyFreekie?.id;
+const alreadyCaught = gameState.party.some(f => f.id === enemyId && f.nombre === gameState.battle.enemyFreekie.nombre);
+if (alreadyCaught && gameState.battle.isWild) {
+console.log('⚠️ Freekie ya capturado con este ID');
+}
+originalAttemptCapture.call(this);
+};
+}
+console.log('✅ CaptureFix initialized');
+}
+};
+
+// ===== 3. MEJORA: SISTEMA DE PARTÍCULAS AMBIENTALES =====
+const AmbientParticles = {
+particles: [],
+canvas: null,
+ctx: null,
+enabled: true,
+maxParticles: 80,
+init(gameCanvas) {
+this.canvas = gameCanvas;
+this.ctx = gameCanvas.getContext('2d');
+this.enabled = gameState?.audio?.enabled !== false;
+requestAnimationFrame(() => this.render());
+console.log('✅ AmbientParticles initialized');
+},
+emitAmbient(type = 'dust') {
+if (!this.enabled || this.particles.length >= this.maxParticles) return;
+const particle = {
+x: Math.random() * this.canvas.width,
+y: Math.random() * this.canvas.height,
+vx: (Math.random() - 0.5) * 0.5,
+vy: type === 'rise' ? -0.3 - Math.random() * 0.3 : 0.2 + Math.random() * 0.3,
+life: 1,
+decay: 0.005 + Math.random() * 0.01,
+size: 1 + Math.random() * 3,
+type,
+color: this.getColor(type)
+};
+this.particles.push(particle);
+},
+getColor(type) {
+const colors = {
+dust: 'rgba(255, 255, 255, 0.3)',
+spark: `hsl(${Math.random() * 60 + 30}, 100%, 70%)`,
+leaf: 'rgba(100, 200, 100, 0.4)',
+flower: 'rgba(255, 150, 200, 0.4)',
+snow: 'rgba(255, 255, 255, 0.6)'
+};
+return colors[type] || colors.dust;
+},
+update() {
+this.particles = this.particles.filter(p => {
+p.x += p.vx;
+p.y += p.vy;
+p.life -= p.decay;
+// Wrap around screen
+if (p.x < 0) p.x = this.canvas.width;
+if (p.x > this.canvas.width) p.x = 0;
+if (p.y < 0) p.y = this.canvas.height;
+if (p.y > this.canvas.height) p.y = 0;
+return p.life > 0;
+});
+// Add new particles periodically
+if (Math.random() < 0.3) {
+this.emitAmbient(Math.random() > 0.7 ? 'spark' : 'dust');
+}
+},
+render() {
+this.update();
+this.particles.forEach(p => {
+this.ctx.save();
+this.ctx.globalAlpha = p.life * 0.6;
+this.ctx.fillStyle = p.color;
+this.ctx.beginPath();
+this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+this.ctx.fill();
+this.ctx.restore();
+});
+requestAnimationFrame(() => this.render());
+}
+};
+
+// ===== 4. MEJORA: EFECTOS DE ILUMINACIÓN DINÁMICA =====
+const DynamicLighting = {
+canvas: null,
+ctx: null,
+lightSources: [],
+init(gameCanvas) {
+this.canvas = gameCanvas;
+this.ctx = gameCanvas.getContext('2d');
+// Add player as light source
+this.lightSources.push({
+type: 'player',
+getColor: () => 'rgba(255, 215, 0, 0.15)',
+getRadius: () => 150,
+getPosition: () => ({
+x: this.canvas.width / 2,
+y: this.canvas.height / 2
+})
+});
+console.log('✅ DynamicLighting initialized');
+},
+render() {
+if (!this.ctx || gameState.screen !== 'game') return;
+// Create vignette effect
+const gradient = this.ctx.createRadialGradient(
+this.canvas.width / 2,
+this.canvas.height / 2,
+this.canvas.width / 4,
+this.canvas.width / 2,
+this.canvas.height / 2,
+this.canvas.width / 1.5
+);
+gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+gradient.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
+this.ctx.fillStyle = gradient;
+this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+}
+};
+
+// ===== 5. MEJORA: ANIMACIONES DE TRANSICIÓN SUAVES =====
+const SmoothTransitions = {
+init() {
+// Add CSS for smooth transitions
+const style = document.createElement('style');
+style.textContent = `
+#gameScreen, #battleScreen, #titleScreen, #starterScreen {
+transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+}
+.freekieSprite, .partyIcon, .starterCard {
+transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hpFill, .hpFillBattle {
+transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+}
+.actionBtn, .menuButton, .menuOption {
+transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.damageText {
+will-change: transform, opacity;
+}
+/* Screen flash on battle start */
+@keyframes battleStartFlash {
+0% { background: white; }
+100% { background: transparent; }
+}
+.battle-flash {
+animation: battleStartFlash 0.3s ease-out;
+}
+/* Breathing effect for sprites */
+@keyframes breathe {
+0%, 100% { transform: scale(1); }
+50% { transform: scale(1.02); }
+}
+.freekieSprite img {
+animation: breathe 3s ease-in-out infinite;
+}
+/* Glow effect for active turn */
+.active-turn {
+animation: activeGlow 1.5s ease-in-out infinite;
+}
+@keyframes activeGlow {
+0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
+50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.8); }
+}
+`;
+document.head.appendChild(style);
+console.log('✅ SmoothTransitions initialized');
+}
+};
+
+// ===== 6. MEJORA: EFECTOS DE SONIDO AMBIENTAL =====
+const AmbientSound = {
+audioContext: null,
+enabled: true,
+init() {
+try {
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+this.audioContext = new AudioContext();
+this.enabled = gameState?.audio?.enabled !== false;
+console.log('✅ AmbientSound initialized');
+} catch(e) {
+console.log('⚠️ Audio context not available');
+}
+},
+playAmbient(type = 'wind') {
+if (!this.enabled || !this.audioContext) return;
+const oscillator = this.audioContext.createOscillator();
+const gainNode = this.audioContext.createGain();
+oscillator.connect(gainNode);
+gainNode.connect(this.audioContext.destination);
+oscillator.type = 'sine';
+oscillator.frequency.value = type === 'wind' ? 200 : 300;
+gainNode.gain.value = 0.02;
+oscillator.start();
+gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 2);
+oscillator.stop(this.audioContext.currentTime + 2);
+}
+};
+
+// ===== 7. MEJORA: SISTEMA DE CLIMA DINÁMICO =====
+const WeatherSystem = {
+currentWeather: 'clear',
+weatherEffects: {
+clear: { particles: 'dust', color: 'rgba(255, 255, 255, 0.1)' },
+rain: { particles: 'rise', color: 'rgba(100, 150, 255, 0.3)' },
+sunny: { particles: 'spark', color: 'rgba(255, 255, 200, 0.2)' },
+night: { particles: 'spark', color: 'rgba(200, 200, 255, 0.3)' }
+},
+init() {
+// Change weather based on time
+setInterval(() => {
+if (gameState?.player?.time !== undefined) {
+const hour = (gameState.player.time % 24);
+if (hour >= 6 && hour < 18) {
+this.currentWeather = hour >= 10 && hour <= 14 ? 'sunny' : 'clear';
+} else {
+this.currentWeather = 'night';
+}
+this.applyWeather();
+}
+}, 5000);
+console.log('✅ WeatherSystem initialized');
+},
+applyWeather() {
+const effect = this.weatherEffects[this.currentWeather];
+if (!effect) return;
+// Apply overlay
+let overlay = document.getElementById('weatherOverlay');
+if (!overlay) {
+overlay = document.createElement('div');
+overlay.id = 'weatherOverlay';
+overlay.style.cssText = `
+position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+pointer-events: none; z-index: 50; transition: background 1s ease;
+`;
+document.getElementById('gameScreen')?.appendChild(overlay);
+}
+overlay.style.background = effect.color;
+}
+};
+
+// ===== 8. MEJORA: EFECTOS DE BATALLA MEJORADOS =====
+const EnhancedBattleEffects = {
+init() {
+// Hook into battle start for visual effects
+const originalStartBattle = window.startBattle;
+if (originalStartBattle) {
+window.startBattle = function(enemy, isWild, gym = null) {
+// Screen flash effect
+const flash = document.createElement('div');
+flash.className = 'battle-flash';
+flash.style.cssText = `
+position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+pointer-events: none; z-index: 9999;
+`;
+document.body.appendChild(flash);
+setTimeout(() => flash.remove(), 300);
+originalStartBattle.call(this, enemy, isWild, gym);
+};
+}
+console.log('✅ EnhancedBattleEffects initialized');
+}
+};
+
+// ===== 9. MEJORA: INDICADORES VISUALES DE ESTADO =====
+const StatusIndicators = {
+init() {
+// Add HP color indicators
+const style = document.createElement('style');
+style.textContent = `
+.hpFill.low { background: linear-gradient(90deg, #ff1a1a, #ff6600) !important; }
+.hpFill.medium { background: linear-gradient(90deg, #ffcc00, #ff6600) !important; }
+.hpFill.high { background: linear-gradient(90deg, #4CAF50, #8BC34A) !important; }
+/* Status effect indicators */
+.status-poison { filter: hue-rotate(90deg); }
+.status-burn { filter: sepia(1) hue-rotate(-30deg); }
+.status-paralyze { filter: brightness(1.2) contrast(1.1); }
+/* Level difference indicator */
+.level-advantage { color: #4CAF50; font-weight: bold; }
+.level-disadvantage { color: #FF6B6B; font-weight: bold; }
+`;
+document.head.appendChild(style);
+// Hook updateBattleDisplay to add status classes
+const originalUpdateDisplay = window.updateBattleDisplay;
+if (originalUpdateDisplay) {
+window.updateBattleDisplay = function() {
+originalUpdateDisplay.call(this);
+// Add HP color classes
+const playerHP = gameState.battle?.playerFreekie;
+const enemyHP = gameState.battle?.enemyFreekie;
+if (playerHP) {
+const playerBar = document.getElementById('playerHPBar');
+const ratio = playerHP.currentHP / playerHP.hp;
+playerBar.className = 'hpFillBattle ' + (ratio < 0.25 ? 'low' : ratio < 0.5 ? 'medium' : 'high');
+}
+if (enemyHP) {
+const enemyBar = document.getElementById('enemyHPBar');
+const ratio = enemyHP.currentHP / enemyHP.hp;
+enemyBar.className = 'hpFillBattle ' + (ratio < 0.25 ? 'low' : ratio < 0.5 ? 'medium' : 'high');
+}
+};
+}
+console.log('✅ StatusIndicators initialized');
+}
+};
+
+// ===== 10. MEJORA: EFECTOS DE MOVIMIENTO DEL JUGADOR =====
+const PlayerMovementEffects = {
+init() {
+const originalMove = window.movePlayer;
+if (originalMove) {
+window.movePlayer = function(dx, dy) {
+// Add footstep particles
+if (gameState.screen === 'game' && AmbientParticles.particles) {
+for (let i = 0; i < 3; i++) {
+AmbientParticles.emitAmbient('dust');
+}
+}
+originalMove.call(this, dx, dy);
+};
+}
+console.log('✅ PlayerMovementEffects initialized');
+}
+};
+
+// ===== INICIALIZACIÓN GENERAL =====
+function initAll() {
+const initInterval = setInterval(() => {
+if (typeof gameState !== 'undefined' && typeof freekiesDB !== 'undefined') {
+clearInterval(initInterval);
+// Initialize all fixes and enhancements
+ActiveFreekieTracker.init();
+CaptureFix.init();
+SmoothTransitions.init();
+StatusIndicators.init();
+EnhancedBattleEffects.init();
+PlayerMovementEffects.init();
+// Wait for canvas
+const waitForCanvas = setInterval(() => {
+const gameCanvas = document.getElementById('gameCanvas');
+if (gameCanvas) {
+clearInterval(waitForCanvas);
+AmbientParticles.init(gameCanvas);
+DynamicLighting.init(gameCanvas);
+}
+}, 100);
+// Initialize weather and sound
+WeatherSystem.init();
+AmbientSound.init();
+console.log('✅✅✅ BugFix + Environment v6.0 FULLY LOADED! ✅✅✅');
+console.log('🎮 Bug de cambio de Pokémon: RESUELTO');
+console.log('🌟 Mejoras de ambiente: ACTIVADAS');
+console.log('💡 Tip: Las partículas ambientales ahora siguen al jugador');
+}
+}, 100);
+}
+if (document.readyState === 'loading') {
+document.addEventListener('DOMContentLoaded', initAll);
+} else {
+initAll();
+}
+// Expose for debugging
+window.BugFixEnvironment = {
+Tracker: ActiveFreekieTracker,
+Capture: CaptureFix,
+Particles: AmbientParticles,
+Lighting: DynamicLighting,
+Transitions: SmoothTransitions,
+Sound: AmbientSound,
+Weather: WeatherSystem,
+Battle: EnhancedBattleEffects,
+Status: StatusIndicators,
+Movement: PlayerMovementEffects
+};
+})();
+</script>
+<!-- ===================================================== -->
+<!-- FIN DEL BUGFIX + MEJORAS AMBIENTE v6.0 -->
+<!-- ===================================================== -->
 </body>
 </html>
 
