@@ -1112,6 +1112,3197 @@ font-size: 1.4rem;
 </style>
 </head>
 <body>
+  <!DOCTYPE html>
+<html lang="es">
+<head>
+<script type="module">
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+apiKey: "AIzaSyBGDSPE3AlDnOUstepSlXm56DxSYDBJwkA",
+authDomain: "freekie-games.firebaseapp.com",
+projectId: "freekie-games",
+storageBucket: "freekie-games.firebasestorage.app",
+messagingSenderId: "756123313733",
+appId: "1:756123313733:web:50ae4196e9f1388ddc652c",
+measurementId: "G-WBEDRJZ3E8"
+};
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Freekies World - Ultimate RPG</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixel+Operator&family=VT323&display=swap" rel="stylesheet">
+<style>
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+:root {
+--primary: #FF6B6B;
+--secondary: #4ECDC4;
+--accent: #FFD700;
+--dark: #1a1a2e;
+--light: #F5F6FA;
+--success: #95E1D3;
+--battle-bg: linear-gradient(180deg, #2c3e50 0%, #4a6491 100%);
+}
+html, body {
+width: 100%;
+height: 100%;
+overflow: hidden;
+background: #0f0f1a;
+font-family: 'VT323', 'Courier New', monospace;
+-webkit-font-smoothing: antialiased;
+touch-action: manipulation;
+}
+body {
+display: flex;
+justify-content: center;
+align-items: center;
+}
+#gameContainer {
+width: 100vw;
+height: 100vh;
+position: relative;
+overflow: hidden;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+max-width: 1200px;
+margin: 0 auto;
+}
+/* ===== PANTALLA DE TÍTULO ===== */
+#titleScreen {
+width: 100%;
+height: 100%;
+background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+animation: fadeIn 1s ease-out;
+position: relative;
+overflow: hidden;
+padding: 2rem;
+}
+#titleScreen::before {
+content: '';
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background:
+radial-gradient(circle at 20% 50%, rgba(255, 107, 107, 0.15) 0%, transparent 50%),
+radial-gradient(circle at 80% 80%, rgba(78, 205, 196, 0.15) 0%, transparent 50%);
+pointer-events: none;
+}
+#logo {
+font-family: 'Press Start 2P', monospace;
+font-size: clamp(2.5rem, 8vw, 5rem);
+color: var(--accent);
+text-shadow:
+4px 4px 0 var(--primary),
+8px 8px 0 var(--secondary),
+12px 12px 20px rgba(0, 0, 0, 0.8);
+margin-bottom: 3rem;
+animation: bounce 2s infinite ease-in-out;
+letter-spacing: 4px;
+z-index: 10;
+text-align: center;
+padding: 0 1rem;
+}
+.menuButton {
+background: linear-gradient(135deg, var(--primary) 0%, #FF5252 100%);
+color: white;
+border: none;
+padding: 1.2rem 2.5rem;
+margin: 1rem;
+font-size: clamp(1rem, 4vw, 1.3rem);
+cursor: pointer;
+font-family: 'Press Start 2P', monospace;
+transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+position: relative;
+text-transform: uppercase;
+letter-spacing: 3px;
+z-index: 10;
+border-radius: 15px;
+min-width: 220px;
+}
+.menuButton:hover {
+transform: translateY(-6px) scale(1.05);
+box-shadow: 0 15px 40px rgba(255, 107, 107, 0.6);
+background: linear-gradient(135deg, #ff4444 0%, #ff1a1a 100%);
+}
+.menuButton:active {
+transform: translateY(2px) scale(0.98);
+box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+}
+/* ===== PANTALLA DE SELECCIÓN ===== */
+#starterScreen {
+width: 100%;
+height: 100%;
+background: linear-gradient(135deg, #0F5F4C 0%, #1B9B8F 50%, #2EAD9B 100%);
+display: none;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+padding: 2rem;
+overflow-y: auto;
+animation: fadeIn 0.8s ease-out;
+position: absolute;
+top: 0;
+left: 0;
+}
+#starterScreen h2 {
+color: white;
+font-family: 'Press Start 2P', monospace;
+font-size: clamp(1.5rem, 6vw, 2.5rem);
+margin-bottom: 2.5rem;
+text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+text-align: center;
+animation: slideDown 0.6s ease-out;
+padding: 0 1rem;
+}
+.starterContainer {
+display: flex;
+gap: 2.5rem;
+flex-wrap: wrap;
+justify-content: center;
+max-width: 1400px;
+padding: 1rem;
+}
+.starterCard {
+background: rgba(255, 255, 255, 0.97);
+border: 5px solid #2D3436;
+border-radius: 25px;
+padding: 2.5rem 2rem;
+width: 320px;
+cursor: pointer;
+transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+position: relative;
+overflow: hidden;
+text-align: center;
+}
+.starterCard:hover {
+transform: translateY(-20px) scale(1.05);
+box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+z-index: 100;
+}
+.starterCard:active {
+transform: translateY(-5px) scale(0.98);
+}
+.starterCard img {
+width: 180px;
+height: 180px;
+margin: 0 auto 1.5rem;
+display: block;
+image-rendering: pixelated;
+filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
+transition: transform 0.3s ease;
+}
+.starterCard:hover img {
+transform: scale(1.1);
+}
+.starterCard h3 {
+text-align: center;
+font-family: 'Press Start 2P', monospace;
+font-size: 1.4rem;
+margin-bottom: 1.2rem;
+color: var(--dark);
+text-shadow: 2px 2px 0 rgba(255, 215, 0, 0.3);
+}
+.starterCard .stats {
+font-size: 0.95rem;
+color: #333;
+line-height: 2.2;
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 0.7rem;
+font-weight: bold;
+}
+/* ===== PANTALLA DE JUEGO ===== */
+#gameScreen {
+width: 100%;
+height: 100%;
+display: none;
+position: relative;
+background: #0f0f1a;
+overflow: hidden;
+}
+#gameCanvas {
+width: 100%;
+height: 100%;
+display: block;
+image-rendering: pixelated;
+max-width: 1200px;
+max-height: 800px;
+}
+#gameUI {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+pointer-events: none;
+display: flex;
+flex-direction: column;
+}
+#topBar {
+background: linear-gradient(135deg, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.85) 100%);
+color: white;
+padding: 1.2rem 2rem;
+display: flex;
+justify-content: space-between;
+align-items: center;
+pointer-events: all;
+font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+border-bottom: 4px solid var(--accent);
+gap: 2.5rem;
+z-index: 100;
+backdrop-filter: blur(5px);
+}
+#playerInfo {
+display: flex;
+gap: 2.5rem;
+align-items: center;
+}
+#partyDisplay {
+display: flex;
+gap: 0.8rem;
+padding: 0 1rem;
+}
+.partyIcon {
+width: 60px;
+height: 60px;
+background: rgba(255, 255, 255, 0.15);
+border: 4px solid var(--accent);
+border-radius: 50%;
+position: relative;
+overflow: hidden;
+transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+cursor: pointer;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+.partyIcon:hover {
+transform: scale(1.2) rotate(5deg);
+background: rgba(255, 255, 255, 0.3);
+box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+z-index: 10;
+}
+.partyIcon img {
+width: 100%;
+height: 100%;
+object-fit: contain;
+image-rendering: pixelated;
+padding: 5px;
+}
+.partyIcon .hpBar {
+position: absolute;
+bottom: 3px;
+left: 3px;
+right: 3px;
+height: 5px;
+background: #444;
+border-radius: 2px;
+overflow: hidden;
+}
+.partyIcon .hpFill {
+height: 100%;
+background: linear-gradient(90deg, #4CAF50, #8BC34A);
+transition: width 0.3s ease;
+border-radius: 2px;
+}
+#controls {
+position: absolute;
+bottom: 2.5rem;
+right: 2.5rem;
+display: none;
+pointer-events: all;
+gap: 0.8rem;
+z-index: 200;
+background: rgba(0, 0, 0, 0.75);
+padding: 1.5rem;
+border-radius: 25px;
+border: 4px solid var(--accent);
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+.controlBtn {
+width: 80px;
+height: 80px;
+background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.9));
+border: 4px solid var(--dark);
+border-radius: 20px;
+font-size: 2.2rem;
+cursor: pointer;
+font-weight: bold;
+transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+color: var(--dark);
+position: relative;
+overflow: hidden;
+}
+.controlBtn:active {
+transform: scale(0.85);
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+background: linear-gradient(135deg, #ffd700, #ffcc00);
+}
+.controlBtn::after {
+content: '';
+position: absolute;
+top: -50%;
+left: -50%;
+width: 200%;
+height: 200%;
+background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+opacity: 0;
+transition: opacity 0.3s;
+}
+.controlBtn:active::after {
+opacity: 1;
+}
+/* ===== PANTALLA DE BATALLA ===== */
+#battleScreen {
+width: 100%;
+height: 100%;
+display: none;
+flex-direction: column;
+background: var(--battle-bg);
+animation: fadeIn 0.5s ease-out;
+position: relative;
+overflow: hidden;
+}
+#battleScreen::before {
+content: '';
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: 
+radial-gradient(circle at 30% 30%, rgba(255, 107, 107, 0.1) 0%, transparent 40%),
+radial-gradient(circle at 70% 70%, rgba(78, 205, 196, 0.1) 0%, transparent 40%);
+pointer-events: none;
+}
+#battleField {
+flex: 1;
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: clamp(1.5rem, 5vw, 3rem);
+position: relative;
+max-width: 1200px;
+margin: 0 auto;
+width: 100%;
+}
+.battleSide {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 1.5rem;
+position: relative;
+z-index: 10;
+}
+.freekieSprite {
+width: 280px;
+height: 280px;
+background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1));
+border-radius: 25px;
+position: relative;
+transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+border: 5px solid rgba(255,255,255,0.7);
+display: flex;
+align-items: center;
+justify-content: center;
+backdrop-filter: blur(8px);
+box-shadow: 
+0 10px 30px rgba(0, 0, 0, 0.3),
+inset 0 0 20px rgba(255, 255, 255, 0.1);
+}
+.freekieSprite.active-turn {
+box-shadow: 
+0 0 0 8px rgba(255, 215, 0, 0.6),
+0 15px 40px rgba(0, 0, 0, 0.4),
+inset 0 0 30px rgba(255, 255, 255, 0.2);
+transform: scale(1.05);
+background: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0.2));
+}
+.freekieSprite img {
+width: 220px;
+height: 220px;
+object-fit: contain;
+image-rendering: pixelated;
+filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
+transition: transform 0.3s ease;
+}
+.freekieSprite.shake {
+animation: shake 0.4s;
+}
+.freekieSprite.attack {
+animation: attackAnim 0.5s;
+}
+.freekieInfo {
+background: rgba(0, 0, 0, 0.88);
+color: white;
+padding: 1.5rem;
+border-radius: 20px;
+font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+min-width: 250px;
+text-align: center;
+border: 3px solid var(--accent);
+box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+position: relative;
+z-index: 20;
+}
+.freekieInfo::before {
+content: '';
+position: absolute;
+top: -3px;
+left: -3px;
+right: -3px;
+bottom: -3px;
+background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent), var(--success));
+z-index: -1;
+border-radius: 23px;
+opacity: 0.7;
+}
+.hpBarBattle {
+width: 100%;
+height: 25px;
+background: #444;
+border-radius: 12px;
+margin-top: 1rem;
+overflow: hidden;
+border: 3px solid #555;
+position: relative;
+}
+.hpFillBattle {
+height: 100%;
+background: linear-gradient(90deg, #4CAF50, #8BC34A);
+transition: width 0.5s ease-out;
+border-radius: 10px;
+position: relative;
+}
+.hpFillBattle::after {
+content: '';
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+animation: hpShine 2s infinite;
+}
+#battleMenu {
+background: linear-gradient(180deg, rgba(0, 0, 0, 0.97), rgba(0, 0, 0, 0.92));
+border-top: 5px solid var(--accent);
+padding: clamp(1.5rem, 4vw, 2.5rem);
+min-height: 220px;
+display: flex;
+flex-direction: column;
+justify-content: center;
+pointer-events: all;
+max-width: 1200px;
+margin: 0 auto;
+width: 100%;
+box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+}
+#battleText {
+color: var(--accent);
+font-family: 'Press Start 2P', monospace;
+font-size: clamp(1rem, 3vw, 1.4rem);
+margin-bottom: 2rem;
+min-height: 80px;
+line-height: 1.7;
+text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+text-align: center;
+padding: 0 1rem;
+animation: textGlow 2s infinite alternate;
+}
+@keyframes textGlow {
+from { text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8), 0 0 10px var(--accent); }
+to { text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8), 0 0 20px var(--accent), 0 0 30px var(--secondary); }
+}
+#battleActions {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+gap: 1.5rem;
+max-width: 900px;
+margin: 0 auto;
+width: 100%;
+}
+.actionBtn {
+background: linear-gradient(135deg, var(--primary) 0%, #FF5252 100%);
+color: white;
+border: 4px solid var(--accent);
+padding: 1.4rem 1rem;
+font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+cursor: pointer;
+border-radius: 20px;
+font-family: 'Press Start 2P', monospace;
+transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+text-transform: uppercase;
+box-shadow: 0 10px 25px rgba(255, 107, 107, 0.4);
+position: relative;
+overflow: hidden;
+font-weight: bold;
+letter-spacing: 1px;
+min-height: 80px;
+display: flex;
+align-items: center;
+justify-content: center;
+text-align: center;
+}
+.actionBtn:hover:not(:disabled) {
+transform: translateY(-6px) scale(1.05);
+box-shadow: 0 15px 35px rgba(255, 107, 107, 0.6);
+background: linear-gradient(135deg, #ff4444 0%, #ff1a1a 100%);
+}
+.actionBtn:active:not(:disabled) {
+transform: translateY(4px) scale(0.98);
+box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+}
+.actionBtn::after {
+content: '';
+position: absolute;
+top: -50%;
+left: -50%;
+width: 200%;
+height: 200%;
+background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+opacity: 0;
+transition: opacity 0.3s;
+}
+.actionBtn:active::after {
+opacity: 1;
+}
+.actionBtn:disabled {
+opacity: 0.6;
+cursor: not-allowed;
+transform: none !important;
+}
+.actionBtn.critical {
+background: linear-gradient(135deg, #ff1a1a, #cc0000);
+border-color: #ffcc00;
+box-shadow: 0 0 15px rgba(255, 30, 30, 0.7);
+animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+0% { box-shadow: 0 0 0 0 rgba(255, 30, 30, 0.4); }
+70% { box-shadow: 0 0 0 12px rgba(255, 30, 30, 0); }
+100% { box-shadow: 0 0 0 0 rgba(255, 30, 30, 0); }
+}
+/* ===== DIÁLOGOS ===== */
+#dialogBox {
+position: fixed;
+bottom: 3rem;
+left: 50%;
+transform: translateX(-50%) translateY(150px);
+width: 90%;
+max-width: 800px;
+background: linear-gradient(135deg, rgba(0, 0, 0, 0.97), rgba(0, 0, 0, 0.92));
+border: 5px solid var(--accent);
+border-radius: 25px;
+padding: 2rem;
+color: white;
+font-size: clamp(1rem, 3vw, 1.3rem);
+display: none;
+pointer-events: all;
+z-index: 2000;
+box-shadow: 0 15px 50px rgba(0, 0, 0, 0.7);
+animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+backdrop-filter: blur(10px);
+}
+#dialogBox.active {
+display: block;
+transform: translateX(-50%) translateY(0);
+}
+#dialogNPC {
+display: flex;
+align-items: center;
+margin-bottom: 1.5rem;
+gap: 1.5rem;
+padding-bottom: 1.5rem;
+border-bottom: 3px solid var(--accent);
+}
+#dialogNPC img {
+width: 100px;
+height: 100px;
+border-radius: 50%;
+background: linear-gradient(135deg, #444, #555);
+object-fit: contain;
+border: 5px solid var(--accent);
+image-rendering: pixelated;
+box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+#dialogNPCName {
+font-family: 'Press Start 2P', monospace;
+color: var(--accent);
+font-size: clamp(1.2rem, 4vw, 1.8rem);
+}
+#dialogText {
+line-height: 1.9;
+font-size: clamp(1rem, 3vw, 1.3rem);
+padding: 0.5rem 0;
+}
+/* ===== MENÚS ===== */
+#mainMenu {
+position: fixed;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%) scale(0.8);
+background: linear-gradient(135deg, rgba(0, 0, 0, 0.99), rgba(45, 52, 54, 0.99));
+border: 5px solid var(--accent);
+border-radius: 30px;
+padding: 2.5rem;
+display: none;
+z-index: 3000;
+pointer-events: all;
+animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+min-width: 350px;
+max-width: 90%;
+max-height: 85vh;
+overflow-y: auto;
+backdrop-filter: blur(10px);
+}
+#mainMenu.active {
+display: block;
+transform: translate(-50%, -50%) scale(1);
+}
+.menuOption {
+background: linear-gradient(135deg, #444, #555);
+color: white;
+border: 4px solid var(--accent);
+padding: 1.5rem 2rem;
+margin: 1rem 0;
+cursor: pointer;
+border-radius: 15px;
+transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+font-family: 'Press Start 2P', monospace;
+text-transform: uppercase;
+text-align: center;
+font-size: clamp(1rem, 3vw, 1.3rem);
+box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+position: relative;
+overflow: hidden;
+}
+.menuOption:hover {
+background: linear-gradient(135deg, #666, #777);
+transform: translateX(12px) scale(1.03);
+box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+}
+.menuOption:active {
+transform: translateX(6px) scale(0.98);
+background: linear-gradient(135deg, #555, #666);
+}
+.menuOption::after {
+content: '';
+position: absolute;
+top: -50%;
+left: -50%;
+width: 200%;
+height: 200%;
+background: radial-gradient(circle, rgba(255,215,0,0.3) 0%, rgba(255,215,0,0) 70%);
+opacity: 0;
+transition: opacity 0.3s;
+}
+.menuOption:active::after {
+opacity: 1;
+}
+/* ===== PANTALLA DE EQUIPO ===== */
+#partyScreen {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+display: none;
+flex-direction: column;
+padding: 3rem;
+overflow-y: auto;
+z-index: 4000;
+animation: fadeIn 0.4s ease-out;
+}
+#partyScreen.active {
+display: flex;
+}
+#partyScreen h2 {
+color: var(--accent);
+font-family: 'Press Start 2P', monospace;
+font-size: clamp(2rem, 6vw, 3.5rem);
+margin-bottom: 3rem;
+text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.7);
+text-align: center;
+width: 100%;
+}
+#partyList {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+gap: 2.5rem;
+margin-bottom: 3rem;
+justify-content: center;
+}
+.partyMember {
+background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.08));
+border: 4px solid var(--accent);
+border-radius: 25px;
+padding: 2.5rem;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 1.8rem;
+color: white;
+transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+backdrop-filter: blur(10px);
+box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5);
+min-height: 300px;
+}
+.partyMember:hover {
+transform: translateY(-12px) scale(1.03);
+background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.12));
+box-shadow: 0 15px 45px rgba(255, 215, 0, 0.3);
+}
+.partyMember img {
+width: 140px;
+height: 140px;
+background: rgba(0, 0, 0, 0.4);
+border-radius: 20px;
+object-fit: contain;
+image-rendering: pixelated;
+border: 4px solid var(--accent);
+box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+transition: transform 0.3s ease;
+}
+.partyMember:hover img {
+transform: scale(1.1) rotate(5deg);
+}
+.partyMemberInfo {
+text-align: center;
+width: 100%;
+}
+.partyMemberInfo h3 {
+font-family: 'Press Start 2P', monospace;
+font-size: clamp(1.3rem, 4vw, 1.8rem);
+margin-bottom: 1.2rem;
+color: var(--accent);
+text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+.stats {
+font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+line-height: 2.2;
+color: #ddd;
+font-weight: bold;
+}
+/* ===== EFECTOS ===== */
+.damageText {
+position: fixed;
+font-family: 'Press Start 2P', monospace;
+font-size: clamp(2rem, 6vw, 4rem);
+font-weight: bold;
+color: var(--primary);
+text-shadow: 
+4px 4px 0 rgba(0, 0, 0, 0.9),
+8px 8px 10px rgba(0, 0, 0, 0.8);
+pointer-events: none;
+animation: damageFloat 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+z-index: 1000;
+font-weight: bold;
+letter-spacing: -2px;
+text-align: center;
+width: 100px;
+left: calc(50% - 50px);
+}
+.damageText.critical {
+color: #ff1a1a;
+text-shadow: 
+0 0 10px #ffcc00,
+4px 4px 0 rgba(0, 0, 0, 0.9),
+8px 8px 15px rgba(255, 30, 30, 0.8);
+font-size: clamp(2.5rem, 7vw, 5rem);
+animation: criticalDamage 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes criticalDamage {
+0% { transform: scale(0.8) translateY(0); opacity: 1; }
+30% { transform: scale(1.3) translateY(-20px); opacity: 1; }
+70% { transform: scale(1.1) translateY(-60px); opacity: 0.8; }
+100% { transform: scale(1.5) translateY(-100px); opacity: 0; }
+}
+.particle {
+position: fixed;
+width: 15px;
+height: 15px;
+border-radius: 50%;
+pointer-events: none;
+animation: particleFloat 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+z-index: 999;
+box-shadow: 0 0 10px currentColor;
+}
+/* ===== ANIMACIONES ===== */
+@keyframes fadeIn {
+from { opacity: 0; }
+to { opacity: 1; }
+}
+@keyframes slideDown {
+from { transform: translateY(-60px); opacity: 0; }
+to { transform: translateY(0); opacity: 1; }
+}
+@keyframes bounce {
+0%, 100% { transform: translateY(0); }
+50% { transform: translateY(-25px); }
+}
+@keyframes shake {
+0%, 100% { transform: translateX(0); }
+10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+@keyframes attackAnim {
+0% { transform: scale(1) translateX(0); }
+40% { transform: scale(1.2) translateX(-30px); }
+70% { transform: scale(1.1) translateX(-15px); }
+100% { transform: scale(1) translateX(0); }
+}
+@keyframes slideUp {
+from { transform: translateX(-50%) translateY(150px); opacity: 0; }
+to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+@keyframes scaleIn {
+from { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+@keyframes particleFloat {
+from { 
+transform: translateY(0) scale(1); 
+opacity: 1; 
+}
+to { 
+transform: translateY(-150px) scale(0.2); 
+opacity: 0; 
+filter: blur(5px);
+}
+}
+@keyframes damageFloat {
+from { 
+transform: translateY(0) scale(0.8); 
+opacity: 1; 
+}
+to { 
+transform: translateY(-100px) scale(1.3); 
+opacity: 0; 
+}
+}
+@keyframes hpShine {
+0% { opacity: 0.5; transform: translateX(-100%); }
+50% { opacity: 1; transform: translateX(100%); }
+100% { opacity: 0.5; transform: translateX(300%); }
+}
+/* ===== BOTONES ESPECIALES ===== */
+#audioControl {
+position: fixed;
+top: 2rem;
+right: 2rem;
+background: linear-gradient(135deg, var(--primary), #FF5252);
+color: white;
+border: 4px solid var(--accent);
+padding: 1rem 1.5rem;
+cursor: pointer;
+border-radius: 15px;
+z-index: 5000;
+pointer-events: all;
+font-size: clamp(1.5rem, 4vw, 2rem);
+transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+font-family: 'Press Start 2P', monospace;
+box-shadow: 0 8px 25px rgba(255, 107, 107, 0.5);
+width: 70px;
+height: 70px;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+#audioControl:hover {
+transform: scale(1.15) rotate(10deg);
+box-shadow: 0 12px 35px rgba(255, 107, 107, 0.7);
+background: linear-gradient(135deg, #ff4444, #ff1a1a);
+}
+#audioControl:active {
+transform: scale(0.95) rotate(0);
+}
+/* ===== PANTALLA DE CURACIÓN ===== */
+#healingScreen {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: linear-gradient(135deg, var(--primary), var(--accent));
+display: none;
+justify-content: center;
+align-items: center;
+flex-direction: column;
+z-index: 4500;
+animation: fadeIn 0.5s ease-out;
+gap: 3rem;
+}
+#healingScreen.active {
+display: flex;
+}
+.healingMessage {
+font-family: 'Press Start 2P', monospace;
+font-size: clamp(2.5rem, 8vw, 4.5rem);
+color: white;
+text-align: center;
+text-shadow: 4px 4px 10px rgba(0, 0, 0, 0.7);
+animation: pulse 1.2s infinite;
+padding: 1rem 2rem;
+background: rgba(0, 0, 0, 0.3);
+border-radius: 25px;
+border: 4px solid white;
+letter-spacing: 3px;
+}
+/* ===== MAPA Y COLISIONES ===== */
+.mapTile {
+position: absolute;
+transition: opacity 0.3s ease;
+}
+.collisionTile {
+position: absolute;
+background: rgba(255, 0, 0, 0.2);
+border: 1px dashed red;
+pointer-events: none;
+}
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+#logo {
+font-size: 3rem;
+}
+.menuButton {
+padding: 1rem 2rem;
+font-size: 1.1rem;
+min-width: 180px;
+margin: 0.8rem;
+}
+.starterContainer {
+gap: 1.5rem;
+}
+.starterCard {
+width: 260px;
+padding: 1.8rem 1.5rem;
+}
+.starterCard img {
+width: 150px;
+height: 150px;
+}
+#controls {
+bottom: 1.5rem;
+right: 1.5rem;
+padding: 1rem;
+border-radius: 20px;
+}
+.controlBtn {
+width: 65px;
+height: 65px;
+font-size: 1.8rem;
+border-radius: 15px;
+}
+#battleField {
+flex-direction: column;
+gap: 2.5rem;
+padding: 1.5rem;
+}
+.freekieSprite {
+width: 200px;
+height: 200px;
+}
+.freekieSprite img {
+width: 160px;
+height: 160px;
+}
+#battleActions {
+grid-template-columns: repeat(2, 1fr);
+gap: 1rem;
+}
+.actionBtn {
+font-size: 0.95rem;
+padding: 1.2rem 0.8rem;
+min-height: 70px;
+}
+#topBar {
+flex-direction: column;
+gap: 1rem;
+padding: 1rem;
+font-size: 0.95rem;
+}
+#playerInfo {
+width: 100%;
+justify-content: space-around;
+flex-wrap: wrap;
+}
+#partyDisplay {
+flex-wrap: wrap;
+justify-content: center;
+}
+.partyIcon {
+width: 50px;
+height: 50px;
+}
+}
+@media (max-width: 480px) {
+#topBar {
+padding: 0.8rem;
+font-size: 0.85rem;
+gap: 0.8rem;
+}
+#battleText {
+font-size: 1rem;
+min-height: 60px;
+padding: 0 0.5rem;
+}
+.freekieInfo {
+font-size: 0.85rem;
+padding: 1rem;
+min-width: 180px;
+}
+#dialogBox {
+width: 95%;
+padding: 1.5rem;
+font-size: 0.95rem;
+bottom: 1.5rem;
+}
+#dialogNPC img {
+width: 70px;
+height: 70px;
+}
+#dialogNPCName {
+font-size: 1.3rem;
+}
+#controls {
+bottom: 1rem;
+right: 1rem;
+padding: 0.8rem;
+border-radius: 15px;
+}
+.controlBtn {
+width: 55px;
+height: 55px;
+font-size: 1.5rem;
+border-radius: 12px;
+}
+#partyScreen {
+padding: 1.5rem;
+}
+#partyScreen h2 {
+font-size: 2rem;
+margin-bottom: 2rem;
+}
+#partyList {
+grid-template-columns: 1fr;
+gap: 1.5rem;
+}
+.partyMember {
+padding: 1.8rem;
+min-height: 250px;
+}
+.partyMember img {
+width: 100px;
+height: 100px;
+}
+.partyMemberInfo h3 {
+font-size: 1.4rem;
+}
+}
+</style>
+</head>
+<body>
+<div id="gameContainer">
+<!-- PANTALLA DE TÍTULO -->
+<div id="titleScreen">
+<div id="logo">FREEKIES WORLD</div>
+<button class="menuButton" onclick="startNewGameWithAnalytics()">▶ JUGAR</button>
+<button class="menuButton" onclick="loadGame()">↻ CARGAR</button>
+<button class="menuButton" onclick="showCredits()">ⓘ CRÉDITOS</button>
+</div>
+
+<!-- PANTALLA DE SELECCIÓN -->
+<div id="starterScreen">
+<h2>¡Elige tu Freekie inicial!</h2>
+<div class="starterContainer" id="starterContainer"></div>
+</div>
+<!-- PANTALLA DE JUEGO -->
+<div id="gameScreen">
+<canvas id="gameCanvas"></canvas>
+<div id="gameUI">
+<div id="topBar">
+<div id="playerInfo">
+<span id="playerName">Aventurero</span>
+<span id="playerMoney">💰 3000</span>
+<span id="timeDisplay">☀️ Día 1</span>
+</div>
+<div id="partyDisplay"></div>
+</div>
+</div>
+<!-- DIÁLOGO -->
+<div id="dialogBox">
+<div id="dialogNPC">
+<img id="dialogNPCImage" src="">
+<div id="dialogNPCName">NPC</div>
+</div>
+<div id="dialogText"></div>
+</div>
+<!-- MENÚ PRINCIPAL -->
+<div id="mainMenu">
+<div class="menuOption" onclick="showPartyScreen()">👥 EQUIPO</div>
+<div class="menuOption" onclick="showBag()">🎒 MOCHILA</div>
+<div class="menuOption" onclick="saveGame()">💾 GUARDAR</div>
+<div class="menuOption" onclick="closeMainMenu()">❌ CERRAR</div>
+</div>
+<!-- PANTALLA DE EQUIPO -->
+<div id="partyScreen">
+<h2>TU EQUIPO</h2>
+<div id="partyList"></div>
+<button class="menuButton" onclick="closePartyScreen()">← VOLVER</button>
+</div>
+<!-- CONTROLES MÓVILES -->
+<div id="controls">
+<button class="controlBtn" style="grid-column: 2; grid-row: 1;" onclick="movePlayer(0, -1)">↑</button>
+<button class="controlBtn" style="grid-column: 1; grid-row: 2;" onclick="movePlayer(-1, 0)">←</button>
+<button class="controlBtn" style="grid-column: 2; grid-row: 2;" onclick="handleAction()">✓</button>
+<button class="controlBtn" style="grid-column: 3; grid-row: 2;" onclick="movePlayer(1, 0)">→</button>
+<button class="controlBtn" style="grid-column: 2; grid-row: 3;" onclick="movePlayer(0, 1)">↓</button>
+</div>
+</div>
+<!-- PANTALLA DE BATALLA -->
+<div id="battleScreen">
+<div id="battleField">
+<div class="battleSide">
+<div class="freekieSprite active-turn" id="playerFreekieSprite">
+<img id="playerFreekieImg" src="">
+</div>
+<div class="freekieInfo">
+<div id="playerFreekieName"></div>
+<div>Nv. <span id="playerFreekieLevel"></span></div>
+<div class="hpBarBattle">
+<div class="hpFillBattle" id="playerHPBar"></div>
+</div>
+<div id="playerFreekieHP"></div>
+</div>
+</div>
+<div class="battleSide">
+<div class="freekieSprite" id="enemyFreekieSprite">
+<img id="enemyFreekieImg" src="">
+</div>
+<div class="freekieInfo">
+<div id="enemyFreekieName"></div>
+<div>Nv. <span id="enemyFreekieLevel"></span></div>
+<div class="hpBarBattle">
+<div class="hpFillBattle" id="enemyHPBar"></div>
+</div>
+<div id="enemyFreekieHP"></div>
+</div>
+</div>
+</div>
+<div id="battleMenu">
+<div id="battleText">¿Qué debería hacer tu Freekie?</div>
+<div id="battleActions"></div>
+</div>
+</div>
+<!-- PANTALLA DE CURACIÓN -->
+<div id="healingScreen">
+<div class="healingMessage">✨ CURANDO... ✨</div>
+</div>
+<!-- CONTROL DE AUDIO -->
+<div id="audioControl" onclick="toggleAudio()">🔊</div>
+</div>
+<script>
+// ===== BASE DE DATOS EXTENDIDA DE FREEKIES =====
+const freekiesDB = [
+// INICIALES (Charmander, Squirtle, Bulbasaur)
+{ id: 1, nombre: "Flamegallet", tipo: "Fuego", hp: 45, ataque: 52, defensa: 43, velocidad: 65, nivel: 5, exp: 0, expNext: 100, movimientos: ["Ascua", "Arañazo", "Rugido", "Mordisco Fuego"], evoluciona: { nivel: 16, id: 4 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png", rareza: "inicial" },
+{ id: 2, nombre: "Aquacookie", tipo: "Agua", hp: 44, ataque: 48, defensa: 65, velocidad: 43, nivel: 5, exp: 0, expNext: 100, movimientos: ["Pistola Agua", "Placaje", "Burbuja", "Mordisco"], evoluciona: { nivel: 16, id: 5 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/7.png", rareza: "inicial" },
+{ id: 3, nombre: "Leafbiscuit", tipo: "Planta", hp: 45, ataque: 49, defensa: 49, velocidad: 45, nivel: 5, exp: 0, expNext: 100, movimientos: ["Látigo Cepa", "Placaje", "Hoja Afilada", "Síntesis"], evoluciona: { nivel: 16, id: 6 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png", rareza: "inicial" },
+// EVOLUCIONES (Charmeleon, Wartortle, Ivysaur)
+{ id: 4, nombre: "Blazecrisp", tipo: "Fuego", hp: 58, ataque: 64, defensa: 58, velocidad: 80, nivel: 16, movimientos: ["Lanzallamas", "Colmillo Igneo", "Giro Fuego", "Corte Furia"], evoluciona: { nivel: 36, id: 7 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/5.png", rareza: "raro" },
+{ id: 5, nombre: "Wavechoco", tipo: "Agua", hp: 59, ataque: 63, defensa: 80, velocidad: 58, nivel: 16, movimientos: ["Hidrobomba", "Rayo Burbuja", "Cascada", "Protección"], evoluciona: { nivel: 36, id: 8 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/8.png", rareza: "raro" },
+{ id: 6, nombre: "Forestwafer", tipo: "Planta", hp: 60, ataque: 62, defensa: 63, velocidad: 60, nivel: 16, movimientos: ["Rayo Solar", "Hoja Aguda", "Drenadoras", "Gigadrenado"], evoluciona: { nivel: 36, id: 9 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/2.png", rareza: "raro" },
+// FINALES (Charizard, Blastoise, Venusaur)
+{ id: 7, nombre: "Infernocake", tipo: "Fuego", hp: 78, ataque: 84, defensa: 78, velocidad: 100, nivel: 36, movimientos: ["Explosión Fuego", "Sofoco", "Envite Igneo", "Llamarada"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png", rareza: "legendario" },
+{ id: 8, nombre: "Tsunamibite", tipo: "Agua", hp: 79, ataque: 83, defensa: 100, velocidad: 78, nivel: 36, movimientos: ["Acua Jet", "Hidrocañón", "Surf", "Torbellino"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/9.png", rareza: "legendario" },
+{ id: 9, nombre: "Titantreats", tipo: "Planta", hp: 80, ataque: 82, defensa: 83, velocidad: 80, nivel: 36, movimientos: ["Planta Feroz", "Terremoto Verde", "Latigazo", "Megaagotar"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/3.png", rareza: "legendario" },
+// ELÉCTRICOS (Pichu, Pikachu, Raichu)
+{ id: 10, nombre: "Sparkcrumb", tipo: "Eléctrico", hp: 35, ataque: 55, defensa: 40, velocidad: 90, nivel: 5, movimientos: ["Impactrueno", "Chispa", "Onda Trueno", "Rayo"], evoluciona: { nivel: 20, id: 11 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/172.png", rareza: "común" },
+{ id: 11, nombre: "Voltsnack", tipo: "Eléctrico", hp: 60, ataque: 85, defensa: 50, velocidad: 120, nivel: 20, movimientos: ["Trueno", "Rayo Carga", "Voltio Cruel", "Chispazo"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png", rareza: "raro" },
+// ROCOSOS (Geodude, Graveler, Golem)
+{ id: 12, nombre: "Rockcracker", tipo: "Roca", hp: 50, ataque: 80, defensa: 100, velocidad: 35, nivel: 8, movimientos: ["Lanzarrocas", "Tumba Rocas", "Avalancha", "Poder Pasado"], evoluciona: { nivel: 25, id: 13 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/74.png", rareza: "común" },
+{ id: 13, nombre: "Boulderbite", tipo: "Roca", hp: 80, ataque: 110, defensa: 130, velocidad: 45, nivel: 25, movimientos: ["Roca Afilada", "Terremoto", "Cabeza Roca", "Avalancha"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/76.png", rareza: "épico" },
+// PSÍQUICOS (Abra, Kadabra, Alakazam)
+{ id: 14, nombre: "Mindmunch", tipo: "Psíquico", hp: 40, ataque: 35, defensa: 30, velocidad: 105, nivel: 10, movimientos: ["Confusión", "Psíquico", "Telequinesis", "Premonición"], evoluciona: { nivel: 28, id: 15 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/63.png", rareza: "raro" },
+{ id: 15, nombre: "Cerebroast", tipo: "Psíquico", hp: 70, ataque: 75, defensa: 70, velocidad: 115, nivel: 28, movimientos: ["Psíquico", "Futuro Sight", "Truco Psíquico", "Hipnosis"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/65.png", rareza: "épico" },
+// LUCHA (Mankey, Primeape)
+{ id: 16, nombre: "Punchbar", tipo: "Lucha", hp: 70, ataque: 110, defensa: 60, velocidad: 70, nivel: 12, movimientos: ["Puño Dinámico", "Patada Baja", "Golpe Kárate", "A Bocajarro"], evoluciona: { nivel: 30, id: 17 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/56.png", rareza: "común" },
+{ id: 17, nombre: "Champbread", tipo: "Lucha", hp: 90, ataque: 130, defensa: 80, velocidad: 85, nivel: 30, movimientos: ["Patada Salto", "Puño Certera", "A Quemarropa", "Súper Puño"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/57.png", rareza: "épico" },
+// FANTASMA (Gastly, Haunter, Gengar)
+{ id: 18, nombre: "Phantomunch", tipo: "Fantasma", hp: 45, ataque: 50, defensa: 45, velocidad: 95, nivel: 15, movimientos: ["Sombra Vil", "Lamer", "Maldición", "Bola Sombra"], evoluciona: { nivel: 32, id: 19 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/92.png", rareza: "raro" },
+{ id: 19, nombre: "Specterbite", tipo: "Fantasma", hp: 60, ataque: 65, defensa: 60, velocidad: 110, nivel: 32, movimientos: ["Garra Umbría", "Pesadilla", "Golpe Fantasma", "Infortunio"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/94.png", rareza: "épico" },
+// NORMALES (Pidgeot)
+{ id: 20, nombre: "Butterchip", tipo: "Normal", hp: 40, ataque: 45, defensa: 35, velocidad: 55, nivel: 3, movimientos: ["Placaje", "Arañazo", "Gruñido", "Mordisco"], evoluciona: { nivel: 18, id: 21 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/19.png", rareza: "común" },
+{ id: 21, nombre: "Megabutter", tipo: "Normal", hp: 85, ataque: 80, defensa: 75, velocidad: 100, nivel: 18, movimientos: ["Hiperrayo", "Golpe", "Rapidez", "Triturar"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/20.png", rareza: "raro" },
+// HIELO (Shellder, Cloyster)
+{ id: 22, nombre: "Frostcrunch", tipo: "Hielo", hp: 38, ataque: 41, defensa: 40, velocidad: 65, nivel: 7, movimientos: ["Viento Hielo", "Rayo Hielo", "Ventisca", "Colmillo Hielo"], evoluciona: { nivel: 22, id: 23 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/90.png", rareza: "común" },
+{ id: 23, nombre: "Glacierbake", tipo: "Hielo", hp: 70, ataque: 70, defensa: 80, velocidad: 70, nivel: 22, movimientos: ["Ventisca", "Puño Hielo", "Granizo", "Rayo Aurora"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/91.png", rareza: "épico" },
+// VENENO (Ekans, Arbok)
+{ id: 24, nombre: "Venomwafer", tipo: "Veneno", hp: 40, ataque: 60, defensa: 30, velocidad: 55, nivel: 6, movimientos: ["Picotazo Veneno", "Ácido", "Residuos", "Lodo"], evoluciona: { nivel: 24, id: 25 }, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/23.png", rareza: "común" },
+{ id: 25, nombre: "Toxicrust", tipo: "Veneno", hp: 65, ataque: 90, defensa: 50, velocidad: 85, nivel: 24, movimientos: ["Bomba Lodo", "Tóxico", "Onda Tóxica", "Residuos"], sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/24.png", rareza: "épico" }
+];
+const typeEffectiveness = {
+Fuego: { debil: ["Agua", "Roca"], fuerte: ["Planta", "Hielo", "Acero"] },
+Agua: { debil: ["Planta", "Eléctrico"], fuerte: ["Fuego", "Roca"] },
+Planta: { debil: ["Fuego", "Hielo", "Veneno"], fuerte: ["Agua", "Roca"] },
+Eléctrico: { debil: ["Roca"], fuerte: ["Agua"] },
+Roca: { debil: ["Agua", "Planta", "Lucha"], fuerte: ["Fuego", "Hielo"] },
+Psíquico: { debil: ["Fantasma"], fuerte: ["Lucha", "Veneno"] },
+Lucha: { debil: ["Psíquico", "Hada"], fuerte: ["Normal", "Roca", "Acero"] },
+Fantasma: { debil: ["Fantasma"], fuerte: ["Psíquico", "Fantasma"] },
+Normal: { debil: ["Lucha"], fuerte: [] },
+Hielo: { debil: ["Fuego", "Lucha", "Acero"], fuerte: ["Planta", "Dragón"] },
+Veneno: { debil: ["Psíquico", "Roca"], fuerte: ["Planta", "Hada"] },
+Acero: { debil: ["Fuego", "Lucha"], fuerte: ["Hielo", "Roca", "Hada"] },
+Dragón: { debil: ["Hielo", "Dragón", "Hada"], fuerte: ["Dragón"] },
+Hada: { debil: ["Veneno", "Acero"], fuerte: ["Lucha", "Dragón"] }
+};
+const gyms = [
+{ id: 1, nombre: "Gimnasio de Fuego", lider: "Ignatius", tipo: "Fuego", equipo: [{ id: 4, nivel: 14 }, { id: 1, nivel: 16 }], medalla: "Medalla Llama", x: 15, y: 10 },
+{ id: 2, nombre: "Gimnasio de Agua", lider: "Marina", tipo: "Agua", equipo: [{ id: 2, nivel: 18 }, { id: 5, nivel: 20 }], medalla: "Medalla Cascada", x: 30, y: 15 },
+{ id: 3, nombre: "Gimnasio de Planta", lider: "Flora", tipo: "Planta", equipo: [{ id: 3, nivel: 22 }, { id: 6, nivel: 24 }], medalla: "Medalla Hoja", x: 20, y: 25 },
+{ id: 4, nombre: "Gimnasio Eléctrico", lider: "Voltaire", tipo: "Eléctrico", equipo: [{ id: 10, nivel: 26 }, { id: 11, nivel: 28 }], medalla: "Medalla Voltio", x: 40, y: 20 }
+];
+const npcs = [
+{ x: 25, y: 25, name: "Profesor Oak", dialog: "¡Bienvenido! Los Freekies son seres extraordinarios. Elige con sabiduría a tu compañero.", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/133.png" },
+{ x: 15, y: 15, name: "Entrenador Rojo", dialog: "¡Entrena y conviértete en el mejor maestro de Freekies!", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/39.png" },
+{ x: 30, y: 20, name: "Vendedora", dialog: "Aquí vendo todo tipo de items. ¡Visítame cuando necesites provisiones!", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/113.png" },
+{ x: 10, y: 35, name: "Cura", dialog: "¡Hola! Si tus Freekies están heridos, puedo curarlos completamente gratis.", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/300.png" }
+];
+
+// Sistema de colisiones mejorado
+const collisionMap = new Set();
+function updateCollisionMap() {
+collisionMap.clear();
+// Añadir bordes del mapa
+for (let x = 0; x < gameState.map.width; x++) {
+collisionMap.add(`${x},0`);
+collisionMap.add(`${x},${gameState.map.height - 1}`);
+}
+for (let y = 0; y < gameState.map.height; y++) {
+collisionMap.add(`0,${y}`);
+collisionMap.add(`${gameState.map.width - 1},${y}`);
+}
+// Añadir NPCs
+npcs.forEach(npc => {
+collisionMap.add(`${npc.x},${npc.y}`);
+});
+// Añadir gimnasios
+gyms.forEach(gym => {
+// Bloquear área de 2x2 para cada gimnasio
+for (let dx = 0; dx < 2; dx++) {
+for (let dy = 0; dy < 2; dy++) {
+collisionMap.add(`${gym.x + dx},${gym.y + dy}`);
+}
+}
+});
+// Añadir áreas de hierba alta (zonas de batalla)
+const grassAreas = [
+{ x: 22, y: 22, w: 6, h: 6 },
+{ x: 12, y: 12, w: 5, h: 5 },
+{ x: 32, y: 18, w: 4, h: 4 },
+{ x: 18, y: 38, w: 5, h: 5 },
+{ x: 42, y: 22, w: 4, h: 4 }
+];
+grassAreas.forEach(area => {
+for (let x = area.x; x < area.x + area.w; x++) {
+for (let y = area.y; y < area.y + area.h; y++) {
+// No bloquear completamente, solo para debug visual
+// collisionMap.add(`${x},${y}`);
+}
+}
+});
+}
+function isCollision(x, y) {
+return collisionMap.has(`${x},${y}`);
+}
+
+let gameState = {
+screen: "title",
+player: { name: "Aventurero", x: 25, y: 25, direction: "down", money: 3000, medals: [], day: 1, time: 0 },
+party: [],
+inventory: { freekieball: 10, superball: 5, ultraball: 2, potion: 5, superpotion: 3, hyperpotion: 1, revive: 2 },
+map: { width: 50, height: 50, tileSize: 32 },
+battle: { active: false, playerFreekie: null, enemyFreekie: null, turn: "player", isWild: true },
+audio: { enabled: true },
+lastBattleTime: 0,
+battleCooldown: 1000 // 1 segundo de cooldown entre batallas
+};
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// Mejora de centrado del canvas
+function resizeCanvas() {
+const container = document.getElementById('gameContainer');
+const maxWidth = Math.min(window.innerWidth * 0.95, 1200);
+const maxHeight = Math.min(window.innerHeight * 0.85, 800);
+const aspectRatio = 16/9;
+let width = maxWidth;
+let height = width / aspectRatio;
+if (height > maxHeight) {
+height = maxHeight;
+width = height * aspectRatio;
+}
+canvas.width = width;
+canvas.height = height;
+if (gameState.screen === "game") drawGame();
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+updateCollisionMap();
+
+// Nueva función para iniciar juego con analytics
+function startNewGameWithAnalytics() {
+// Evento Analytics
+if (typeof gtag === 'function') {
+gtag('event', 'jugar', {
+game: 'FreekieAdventure',
+version: '4.0-improved'
+});
+}
+startNewGame();
+}
+
+function startNewGame() {
+document.getElementById('titleScreen').style.display = 'none';
+document.getElementById('starterScreen').style.display = 'flex';
+showStarters();
+}
+
+function showStarters() {
+const container = document.getElementById('starterContainer');
+container.innerHTML = '';
+[freekiesDB[0], freekiesDB[1], freekiesDB[2]].forEach(freekie => {
+const card = document.createElement('div');
+card.className = 'starterCard';
+card.innerHTML = `
+<img src="${freekie.sprite}" alt="${freekie.nombre}">
+<h3>${freekie.nombre}</h3>
+<div class="stats">
+<div>Tipo: ${freekie.tipo}</div>
+<div>HP: ${freekie.hp}</div>
+<div>ATQ: ${freekie.ataque}</div>
+<div>DEF: ${freekie.defensa}</div>
+<div>VEL: ${freekie.velocidad}</div>
+</div>
+`;
+card.onclick = () => selectStarter(freekie);
+container.appendChild(card);
+});
+}
+
+function selectStarter(freekie) {
+const copy = JSON.parse(JSON.stringify(freekie));
+copy.currentHP = copy.hp;
+gameState.party.push(copy);
+document.getElementById('starterScreen').style.display = 'none';
+document.getElementById('gameScreen').style.display = 'block';
+gameState.screen = "game";
+showDialog("Profesor Oak", "¡Excelente elección! " + freekie.nombre + " será tu mejor aliado. ¡Buena suerte en tu aventura!", "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/133.png");
+updatePartyDisplay();
+drawGame();
+}
+
+function loadGame() {
+const saved = localStorage.getItem('freekiesWorldSave');
+if (saved) {
+try {
+gameState = JSON.parse(saved);
+// Validar datos esenciales
+if (!gameState.map) {
+gameState.map = { width: 50, height: 50, tileSize: 32 };
+}
+if (!gameState.inventory) {
+gameState.inventory = { freekieball: 10, superball: 5, ultraball: 2, potion: 5, superpotion: 3, hyperpotion: 1, revive: 2 };
+}
+if (!gameState.player) {
+gameState.player = { name: "Aventurero", x: 25, y: 25, direction: "down", money: 3000, medals: [], day: 1, time: 0 };
+}
+updateCollisionMap();
+document.getElementById('titleScreen').style.display = 'none';
+document.getElementById('gameScreen').style.display = 'block';
+gameState.screen = "game";
+updatePartyDisplay();
+drawGame();
+} catch (e) {
+alert("Error al cargar la partida. Comenzando nueva partida.");
+startNewGame();
+}
+} else {
+alert("No hay partida guardada");
+}
+}
+
+function showCredits() {
+alert(`FREEKIES WORLD ULTIMATE v4.1
+✨ Mejoras implementadas:
+• Sistema de colisiones completo
+• Combate por turnos optimizado
+• Centrado perfecto en todas las pantallas
+• Efectos visuales mejorados
+• Interfaz más intuitiva
+• Rendimiento optimizado
+
+Juego RPG estilo retro
+Desarrollado con HTML5, CSS3 y JavaScript
+Sprites: PokéAPI
+¡Gracias por jugar!`);
+}
+
+function drawGame() {
+if (gameState.screen !== "game") return;
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+// Fondo de césped
+ctx.fillStyle = '#88CC44';
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+const tileSize = gameState.map.tileSize;
+const visibleWidth = Math.ceil(canvas.width / tileSize) + 2;
+const visibleHeight = Math.ceil(canvas.height / tileSize) + 2;
+const offsetX = canvas.width / 2 - gameState.player.x * tileSize;
+const offsetY = canvas.height / 2 - gameState.player.y * tileSize;
+// Dibujar cuadrícula sutil
+ctx.strokeStyle = '#77AA33';
+ctx.lineWidth = 1;
+for (let x = 0; x < visibleWidth; x++) {
+for (let y = 0; y < visibleHeight; y++) {
+const mapX = Math.floor(gameState.player.x - visibleWidth/2 + x);
+const mapY = Math.floor(gameState.player.y - visibleHeight/2 + y);
+if (mapX < 0 || mapX >= gameState.map.width || mapY < 0 || mapY >= gameState.map.height) continue;
+const px = (mapX - gameState.player.x) * tileSize + canvas.width/2;
+const py = (mapY - gameState.player.y) * tileSize + canvas.height/2;
+ctx.strokeRect(px, py, tileSize, tileSize);
+// Dibujar colisiones para debug (comentar en producción)
+/*
+if (isCollision(mapX, mapY)) {
+ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
+ctx.fillRect(px, py, tileSize, tileSize);
+ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+ctx.lineWidth = 2;
+ctx.strokeRect(px, py, tileSize, tileSize);
+}
+*/
+}
+}
+// Dibujar ciudades
+const cities = [
+{ name: "Start", x: 25, y: 25, size: 2, color: '#FFD700' },
+{ name: "Fuego", x: 15, y: 10, size: 2, color: '#FF6347' },
+{ name: "Agua", x: 30, y: 15, size: 2, color: '#4169E1' },
+{ name: "Planta", x: 20, y: 35, size: 2, color: '#32CD32' }
+];
+cities.forEach(city => {
+const px = (city.x - gameState.player.x) * tileSize + canvas.width/2;
+const py = (city.y - gameState.player.y) * tileSize + canvas.height/2;
+ctx.fillStyle = city.color;
+ctx.fillRect(px, py, tileSize * city.size, tileSize * city.size);
+ctx.strokeStyle = '#000';
+ctx.lineWidth = 3;
+ctx.strokeRect(px, py, tileSize * city.size, tileSize * city.size);
+ctx.fillStyle = '#000';
+ctx.font = '16px Arial';
+ctx.textAlign = 'center';
+ctx.fillText(city.name, px + tileSize * city.size/2, py + tileSize * city.size/2 + 5);
+});
+// Dibujar gimnasios
+gyms.forEach(gym => {
+const px = (gym.x - gameState.player.x) * tileSize + canvas.width/2;
+const py = (gym.y - gameState.player.y) * tileSize + canvas.height/2;
+ctx.fillStyle = '#8B0000';
+ctx.fillRect(px, py, tileSize * 1.8, tileSize * 1.8);
+ctx.strokeStyle = '#FFD700';
+ctx.lineWidth = 4;
+ctx.strokeRect(px, py, tileSize * 1.8, tileSize * 1.8);
+ctx.fillStyle = '#FFD700';
+ctx.font = '24px Arial';
+ctx.textAlign = 'center';
+ctx.fillText('🏛️', px + tileSize * 0.9, py + tileSize * 1.1);
+ctx.fillStyle = '#FFF';
+ctx.font = '14px Arial';
+ctx.fillText(gym.nombre, px + tileSize * 0.9, py + tileSize * 1.8 + 15);
+});
+// Dibujar NPCs
+npcs.forEach(npc => {
+const px = (npc.x - gameState.player.x) * tileSize + canvas.width/2;
+const py = (npc.y - gameState.player.y) * tileSize + canvas.height/2;
+ctx.fillStyle = '#FF69B4';
+ctx.beginPath();
+ctx.arc(px + tileSize/2, py + tileSize/2, tileSize/2.5, 0, Math.PI * 2);
+ctx.fill();
+ctx.strokeStyle = '#000';
+ctx.lineWidth = 3;
+ctx.stroke();
+// Dibujar sprite del NPC
+const img = new Image();
+img.src = npc.sprite;
+img.onload = () => {
+ctx.drawImage(img, px + tileSize/2 - 15, py + tileSize/2 - 25, 30, 30);
+};
+});
+// Dibujar áreas de hierba alta
+const grassAreas = [
+{ x: 22, y: 22, w: 6, h: 6 },
+{ x: 12, y: 12, w: 5, h: 5 },
+{ x: 32, y: 18, w: 4, h: 4 },
+{ x: 18, y: 38, w: 5, h: 5 },
+{ x: 42, y: 22, w: 4, h: 4 }
+];
+grassAreas.forEach(area => {
+for (let x = area.x; x < area.x + area.w; x++) {
+for (let y = area.y; y < area.y + area.h; y++) {
+const px = (x - gameState.player.x) * tileSize + canvas.width/2;
+const py = (y - gameState.player.y) * tileSize + canvas.height/2;
+// Efecto de hierba con degradado
+ctx.fillStyle = '#2D8B2D';
+ctx.fillRect(px, py, tileSize, tileSize);
+// Patrón de hierba
+ctx.fillStyle = 'rgba(40, 120, 40, 0.3)';
+ctx.fillRect(px + 2, py + 2, tileSize - 4, tileSize - 4);
+}
+}
+});
+// Dibujar jugador
+const px = canvas.width/2 - tileSize/2;
+const py = canvas.height/2 - tileSize/2;
+ctx.fillStyle = '#3498db';
+ctx.beginPath();
+ctx.arc(canvas.width/2, canvas.height/2, tileSize/2.2, 0, Math.PI * 2);
+ctx.fill();
+ctx.strokeStyle = '#2980b9';
+ctx.lineWidth = 4;
+ctx.stroke();
+// Dibujar dirección del jugador
+ctx.fillStyle = '#FFF';
+ctx.beginPath();
+switch(gameState.player.direction) {
+case 'up': ctx.arc(canvas.width/2, canvas.height/2 - tileSize/4, tileSize/8, 0, Math.PI * 2); break;
+case 'down': ctx.arc(canvas.width/2, canvas.height/2 + tileSize/4, tileSize/8, 0, Math.PI * 2); break;
+case 'left': ctx.arc(canvas.width/2 - tileSize/4, canvas.height/2, tileSize/8, 0, Math.PI * 2); break;
+case 'right': ctx.arc(canvas.width/2 + tileSize/4, canvas.height/2, tileSize/8, 0, Math.PI * 2); break;
+}
+ctx.fill();
+}
+
+function movePlayer(dx, dy) {
+const now = Date.now();
+// Evitar movimiento durante batallas o diálogos
+if (gameState.battle.active || document.getElementById('dialogBox').classList.contains('active')) return;
+const newX = gameState.player.x + dx;
+const newY = gameState.player.y + dy;
+// Verificar colisiones
+if (isCollision(newX, newY)) {
+// Efecto de vibración sutil al chocar
+if (gameState.audio.enabled) {
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const oscillator = audioCtx.createOscillator();
+const gainNode = audioCtx.createGain();
+oscillator.connect(gainNode);
+gainNode.connect(audioCtx.destination);
+oscillator.type = 'square';
+oscillator.frequency.value = 100;
+gainNode.gain.value = 0.1;
+oscillator.start();
+setTimeout(() => oscillator.stop(), 50);
+}
+return;
+}
+// Actualizar dirección
+if (dx > 0) gameState.player.direction = 'right';
+else if (dx < 0) gameState.player.direction = 'left';
+else if (dy > 0) gameState.player.direction = 'down';
+else if (dy < 0) gameState.player.direction = 'up';
+gameState.player.x = newX;
+gameState.player.y = newY;
+// Verificar encuentros en zonas de hierba
+const inGrass = [
+{ x: 22, y: 22, w: 6, h: 6 },
+{ x: 12, y: 12, w: 5, h: 5 },
+{ x: 32, y: 18, w: 4, h: 4 },
+{ x: 18, y: 38, w: 5, h: 5 },
+{ x: 42, y: 22, w: 4, h: 4 }
+].some(area => 
+newX >= area.x && newX < area.x + area.w &&
+newY >= area.y && newY < area.y + area.h
+);
+if (inGrass && now - gameState.lastBattleTime > gameState.battleCooldown && Math.random() < 0.15) {
+gameState.lastBattleTime = now;
+startWildBattle();
+return;
+}
+drawGame();
+}
+
+function handleAction() {
+if (gameState.battle.active) return;
+const direction = gameState.player.direction;
+let checkX = gameState.player.x;
+let checkY = gameState.player.y;
+if (direction === 'up') checkY--;
+else if (direction === 'down') checkY++;
+else if (direction === 'left') checkX--;
+else checkX++;
+// Verificar NPCs
+const npc = npcs.find(n => n.x === checkX && n.y === checkY);
+if (npc) {
+interactWithNPC(npc);
+return;
+}
+// Verificar gimnasios
+const gym = gyms.find(g => 
+checkX >= g.x && checkX < g.x + 2 &&
+checkY >= g.y && checkY < g.y + 2
+);
+if (gym) {
+startGymBattle(gym);
+return;
+}
+// Verificar centro de curación (Cura NPC)
+const healer = npcs.find(n => n.name === "Cura" && 
+checkX >= n.x - 1 && checkX <= n.x + 1 &&
+checkY >= n.y - 1 && checkY <= n.y + 1
+);
+if (healer) {
+healParty();
+return;
+}
+}
+
+function interactWithNPC(npc) {
+showDialog(npc.name, npc.dialog, npc.sprite);
+}
+
+function showDialog(name, text, sprite) {
+document.getElementById('dialogNPCName').textContent = name;
+document.getElementById('dialogNPCImage').src = sprite;
+document.getElementById('dialogText').textContent = text;
+document.getElementById('dialogBox').classList.add('active');
+setTimeout(() => {
+document.getElementById('dialogBox').classList.remove('active');
+}, 5000);
+}
+
+function startWildBattle() {
+const wildFreekies = freekiesDB.filter(f => f.rareza !== 'legendario' && f.rareza !== 'inicial');
+const selected = wildFreekies[Math.floor(Math.random() * wildFreekies.length)];
+const wild = JSON.parse(JSON.stringify(selected));
+wild.nivel = Math.max(3, gameState.party[0].nivel - 2 + Math.floor(Math.random() * 5));
+wild.currentHP = wild.hp;
+startBattle(wild, true);
+}
+
+function startGymBattle(gym) {
+if (gameState.battle.active) return;
+const leaderFreekie = JSON.parse(JSON.stringify(freekiesDB.find(f => f.id === gym.equipo[0].id)));
+leaderFreekie.nivel = gym.equipo[0].nivel;
+leaderFreekie.currentHP = leaderFreekie.hp;
+startBattle(leaderFreekie, false, gym);
+}
+
+function startBattle(enemy, isWild, gym = null) {
+if (gameState.battle.active) return;
+gameState.battle.active = true;
+gameState.battle.playerFreekie = JSON.parse(JSON.stringify(gameState.party[0]));
+gameState.battle.enemyFreekie = enemy;
+gameState.battle.isWild = isWild;
+gameState.battle.gym = gym;
+gameState.battle.turn = "player";
+document.getElementById('gameScreen').style.display = 'none';
+document.getElementById('battleScreen').style.display = 'flex';
+updateBattleDisplay();
+document.getElementById('battleText').textContent = isWild ?
+`¡Un ${enemy.nombre} salvaje apareció!` :
+`¡${gym.lider} quiere luchar!`;
+// Actualizar indicador de turno
+updateTurnIndicator();
+}
+
+function updateBattleDisplay() {
+const p = gameState.battle.playerFreekie;
+const e = gameState.battle.enemyFreekie;
+document.getElementById('playerFreekieName').textContent = p.nombre;
+document.getElementById('playerFreekieLevel').textContent = p.nivel;
+document.getElementById('playerFreekieHP').textContent = `${p.currentHP}/${p.hp}`;
+document.getElementById('playerHPBar').style.width = (p.currentHP / p.hp * 100) + '%';
+document.getElementById('playerFreekieImg').src = p.sprite;
+document.getElementById('enemyFreekieName').textContent = e.nombre;
+document.getElementById('enemyFreekieLevel').textContent = e.nivel;
+document.getElementById('enemyFreekieHP').textContent = `${e.currentHP}/${e.hp}`;
+document.getElementById('enemyHPBar').style.width = (e.currentHP / e.hp * 100) + '%';
+document.getElementById('enemyFreekieImg').src = e.sprite;
+updateBattleActions();
+updateTurnIndicator();
+}
+
+function updateTurnIndicator() {
+const playerSprite = document.getElementById('playerFreekieSprite');
+const enemySprite = document.getElementById('enemyFreekieSprite');
+if (gameState.battle.turn === "player") {
+playerSprite.classList.add('active-turn');
+enemySprite.classList.remove('active-turn');
+} else {
+enemySprite.classList.add('active-turn');
+playerSprite.classList.remove('active-turn');
+}
+}
+
+function updateBattleActions() {
+const div = document.getElementById('battleActions');
+div.innerHTML = '';
+if (gameState.battle.turn === "player") {
+gameState.battle.playerFreekie.movimientos.forEach((move, i) => {
+const btn = document.createElement('button');
+btn.className = 'actionBtn';
+btn.textContent = move;
+// Indicador visual para movimientos efectivos
+const effectiveness = getEffectiveness(gameState.battle.playerFreekie.tipo, gameState.battle.enemyFreekie.tipo);
+if (effectiveness > 1) {
+btn.classList.add('critical');
+}
+btn.onclick = () => playerAttack(i);
+div.appendChild(btn);
+});
+if (gameState.battle.isWild) {
+const catchBtn = document.createElement('button');
+catchBtn.className = 'actionBtn';
+catchBtn.textContent = '🔴 CAPTURAR';
+catchBtn.onclick = attemptCapture;
+div.appendChild(catchBtn);
+}
+const fleeBtn = document.createElement('button');
+fleeBtn.className = 'actionBtn';
+fleeBtn.textContent = '🏃 HUIR';
+fleeBtn.onclick = attemptFlee;
+div.appendChild(fleeBtn);
+}
+}
+
+function playerAttack(moveIndex) {
+if (gameState.battle.turn !== "player") return;
+const p = gameState.battle.playerFreekie;
+const e = gameState.battle.enemyFreekie;
+const move = p.movimientos[moveIndex];
+const damage = calculateDamage(p, e, move);
+const effectiveness = getEffectiveness(p.tipo, e.tipo);
+e.currentHP = Math.max(0, e.currentHP - damage);
+// Animaciones
+document.getElementById('playerFreekieSprite').classList.add('attack');
+setTimeout(() => document.getElementById('playerFreekieSprite').classList.remove('attack'), 500);
+document.getElementById('enemyFreekieSprite').classList.add('shake');
+setTimeout(() => document.getElementById('enemyFreekieSprite').classList.remove('shake'), 500);
+// Mostrar daño con efecto especial si es crítico
+const isCritical = effectiveness > 1 && Math.random() > 0.7;
+showDamageText(damage, 'enemy', isCritical);
+updateBattleDisplay();
+document.getElementById('battleText').textContent = `${p.nombre} usó ${move}! ${effectiveness > 1 ? '¡Es muy efectivo!' : effectiveness < 1 ? 'No es muy efectivo...' : ''}`;
+// Cambiar turno
+gameState.battle.turn = "enemy";
+updateTurnIndicator();
+// Verificar si el enemigo fue derrotado
+if (e.currentHP <= 0) {
+setTimeout(enemyDefeated, 1500);
+return;
+}
+// Turno del enemigo después de un retraso
+setTimeout(enemyAttack, 2000);
+}
+
+function enemyAttack() {
+if (gameState.battle.turn !== "enemy") return;
+const p = gameState.battle.playerFreekie;
+const e = gameState.battle.enemyFreekie;
+const move = e.movimientos[Math.floor(Math.random() * e.movimientos.length)];
+const damage = calculateDamage(e, p, move);
+const effectiveness = getEffectiveness(e.tipo, p.tipo);
+p.currentHP = Math.max(0, p.currentHP - damage);
+// Animaciones
+document.getElementById('enemyFreekieSprite').classList.add('attack');
+setTimeout(() => document.getElementById('enemyFreekieSprite').classList.remove('attack'), 500);
+document.getElementById('playerFreekieSprite').classList.add('shake');
+setTimeout(() => document.getElementById('playerFreekieSprite').classList.remove('shake'), 500);
+// Mostrar daño
+showDamageText(damage, 'player', effectiveness > 1 && Math.random() > 0.7);
+updateBattleDisplay();
+document.getElementById('battleText').textContent = `${e.nombre} usó ${move}! ${effectiveness > 1 ? '¡Es muy efectivo!' : effectiveness < 1 ? 'No es muy efectivo...' : ''}`;
+// Verificar si el jugador fue derrotado
+if (p.currentHP <= 0) {
+setTimeout(playerDefeated, 1500);
+return;
+}
+// Cambiar turno al jugador después de un retraso
+setTimeout(() => {
+gameState.battle.turn = "player";
+document.getElementById('battleText').textContent = "¿Qué debería hacer tu Freekie?";
+updateBattleActions();
+updateTurnIndicator();
+}, 1800);
+}
+
+function calculateDamage(attacker, defender, move) {
+// Fórmula de daño mejorada con variación y efectividad
+const base = Math.floor((2 * attacker.nivel / 5 + 2) * 50 * attacker.ataque / defender.defensa / 50) + 2;
+const effectiveness = getEffectiveness(attacker.tipo, defender.tipo);
+const random = 0.85 + Math.random() * 0.15;
+const critical = Math.random() > 0.9 ? 1.5 : 1; // 10% de probabilidad de golpe crítico
+return Math.floor(base * effectiveness * random * critical);
+}
+
+function getEffectiveness(atkType, defType) {
+const data = typeEffectiveness[atkType];
+if (!data) return 1;
+if (data.fuerte.includes(defType)) return 2;
+if (data.debil.includes(defType)) return 0.5;
+return 1;
+}
+
+function showDamageText(damage, target, isCritical = false) {
+const text = document.createElement('div');
+text.className = `damageText ${isCritical ? 'critical' : ''}`;
+text.textContent = isCritical ? `¡CRÍTICO! -${damage}` : `-${damage}`;
+text.style.left = (target === 'enemy' ? '70%' : '30%');
+text.style.top = '35%';
+document.getElementById('battleScreen').appendChild(text);
+setTimeout(() => text.remove(), isCritical ? 1800 : 1200);
+// Partículas de daño
+for (let i = 0; i < (isCritical ? 15 : 8); i++) {
+const particle = document.createElement('div');
+particle.className = 'particle';
+particle.style.left = (target === 'enemy' ? '70%' : '30%');
+particle.style.top = '35%';
+particle.style.background = isCritical ? 
+['#ff1a1a', '#ffcc00', '#ff6600'][Math.floor(Math.random() * 3)] : 
+['#FF6B6B', '#4ECDC4', '#FFD93D', '#95E1D3'][Math.floor(Math.random() * 4)];
+document.getElementById('battleScreen').appendChild(particle);
+setTimeout(() => particle.remove(), 1200);
+}
+}
+
+function enemyDefeated() {
+const p = gameState.battle.playerFreekie;
+const e = gameState.battle.enemyFreekie;
+document.getElementById('battleText').textContent = `¡${e.nombre} fue derrotado!`;
+// Dar experiencia
+const exp = Math.floor(e.nivel * 50);
+p.exp = (p.exp || 0) + exp;
+document.getElementById('battleText').textContent += ` +${exp} EXP`;
+// Subir de nivel si es necesario
+if (p.exp >= p.expNext) {
+levelUp(p);
+}
+// Dar dinero si es batalla salvaje
+if (gameState.battle.isWild) {
+const money = Math.floor(e.nivel * 15);
+gameState.player.money += money;
+document.getElementById('battleText').textContent += ` +${money}¥`;
+}
+// Si es gimnasio y ganó, dar medalla
+if (!gameState.battle.isWild && gameState.battle.gym) {
+if (!gameState.player.medals.includes(gameState.battle.gym.medalla)) {
+gameState.player.medals.push(gameState.battle.gym.medalla);
+document.getElementById('battleText').textContent += `\n¡Obtuviste la ${gameState.battle.gym.medalla}!`;
+}
+}
+setTimeout(endBattle, 3500);
+}
+
+function playerDefeated() {
+document.getElementById('battleText').textContent = `¡${gameState.battle.playerFreekie.nombre} se debilitó!`;
+setTimeout(() => {
+endBattle();
+healParty();
+showDialog("Profesor Oak", "¡Tus Freekies necesitan descansar! Te he curado en el laboratorio.", "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/133.png");
+}, 3000);
+}
+
+function levelUp(freekie) {
+freekie.nivel++;
+freekie.exp = 0;
+freekie.expNext = Math.floor(freekie.expNext * 1.25);
+freekie.hp += 8;
+freekie.ataque += 5;
+freekie.defensa += 4;
+freekie.velocidad += 4;
+freekie.currentHP = freekie.hp;
+// Evolución
+if (freekie.evoluciona && freekie.nivel >= freekie.evoluciona.nivel) {
+const evolution = freekiesDB.find(f => f.id === freekie.evoluciona.id);
+if (evolution) {
+freekie.nombre = evolution.nombre;
+freekie.sprite = evolution.sprite;
+freekie.tipo = evolution.tipo;
+freekie.movimientos = [...new Set([...freekie.movimientos, ...evolution.movimientos.slice(2)])].slice(0, 4);
+freekie.rareza = evolution.rareza;
+showDialog("¡EVOLUCIÓN!", `${freekie.nombre} evolucionó a ${evolution.nombre}!`, evolution.sprite);
+}
+}
+alert(`¡${freekie.nombre} subió al nivel ${freekie.nivel}! ${freekie.evoluciona && freekie.nivel >= freekie.evoluciona.nivel ? `\n¡Está evolucionando!` : ''}`);
+}
+
+function attemptCapture() {
+if (gameState.battle.turn !== "player") return;
+if (!gameState.battle.isWild) {
+document.getElementById('battleText').textContent = "¡No puedes capturar Freekies de otros entrenadores!";
+setTimeout(() => {
+gameState.battle.turn = "player";
+updateBattleActions();
+updateTurnIndicator();
+}, 2000);
+return;
+}
+if (gameState.inventory.freekieball <= 0) {
+document.getElementById('battleText').textContent = "¡No tienes Freekieballs!";
+setTimeout(() => {
+gameState.battle.turn = "player";
+updateBattleActions();
+updateTurnIndicator();
+}, 2000);
+return;
+}
+gameState.inventory.freekieball--;
+const e = gameState.battle.enemyFreekie;
+const rate = Math.min(0.9, (1 - e.currentHP / e.hp) * 0.7 + 0.2 + (e.rareza === 'legendario' ? -0.3 : e.rareza === 'épico' ? -0.15 : 0));
+document.getElementById('battleText').textContent = "¡Lanzaste una Freekieball!";
+// Animación de la bola
+const ball = document.createElement('div');
+ball.innerHTML = '🔴';
+ball.style.position = 'fixed';
+ball.style.left = '30%';
+ball.style.top = '40%';
+ball.style.fontSize = '4rem';
+ball.style.zIndex = '2000';
+ball.style.animation = 'attackAnim 0.5s, scaleIn 0.3s 0.5s';
+document.getElementById('battleScreen').appendChild(ball);
+setTimeout(() => {
+ball.remove();
+if (Math.random() < rate) {
+e.currentHP = e.hp;
+if (gameState.party.length < 6) {
+gameState.party.push(e);
+document.getElementById('battleText').textContent = `¡Capturaste a ${e.nombre}!`;
+// Actualizar display del equipo
+setTimeout(() => {
+updatePartyDisplay();
+}, 1000);
+} else {
+document.getElementById('battleText').textContent = "¡Tu equipo está lleno! El Freekie fue transferido al Profesor.";
+}
+setTimeout(endBattle, 2500);
+} else {
+document.getElementById('battleText').textContent = `¡Oh no! ¡${e.nombre} escapó de la Freekieball!`;
+// Turno del enemigo después de fallar la captura
+gameState.battle.turn = "enemy";
+updateTurnIndicator();
+setTimeout(enemyAttack, 2000);
+}
+}, 1500);
+}
+
+function attemptFlee() {
+if (gameState.battle.turn !== "player") return;
+if (!gameState.battle.isWild) {
+document.getElementById('battleText').textContent = "¡No puedes huir de una batalla de entrenador!";
+setTimeout(() => {
+gameState.battle.turn = "player";
+updateBattleActions();
+updateTurnIndicator();
+}, 2000);
+return;
+}
+if (Math.random() < 0.75) {
+document.getElementById('battleText').textContent = "¡Lograste escapar!";
+setTimeout(endBattle, 1500);
+} else {
+document.getElementById('battleText').textContent = "¡No pudiste escapar!";
+gameState.battle.turn = "enemy";
+updateTurnIndicator();
+setTimeout(enemyAttack, 1500);
+}
+}
+
+function endBattle() {
+gameState.battle.active = false;
+document.getElementById('battleScreen').style.display = 'none';
+document.getElementById('gameScreen').style.display = 'block';
+// Actualizar el Freekie del equipo con los cambios
+if (gameState.battle.playerFreekie && gameState.party[0]) {
+gameState.party[0] = JSON.parse(JSON.stringify(gameState.battle.playerFreekie));
+}
+updatePartyDisplay();
+drawGame();
+}
+
+function updatePartyDisplay() {
+const display = document.getElementById('partyDisplay');
+display.innerHTML = '';
+gameState.party.forEach(freekie => {
+const icon = document.createElement('div');
+icon.className = 'partyIcon';
+icon.title = `${freekie.nombre} Nv.${freekie.nivel} - HP: ${freekie.currentHP}/${freekie.hp}`;
+const img = document.createElement('img');
+img.src = freekie.sprite;
+icon.appendChild(img);
+const hpBar = document.createElement('div');
+hpBar.className = 'hpBar';
+const hpFill = document.createElement('div');
+hpFill.className = 'hpFill';
+hpFill.style.width = (freekie.currentHP / freekie.hp * 100) + '%';
+// Color del HP según salud
+if (freekie.currentHP / freekie.hp < 0.25) {
+hpFill.style.background = 'linear-gradient(90deg, #ff1a1a, #ff6600)';
+} else if (freekie.currentHP / freekie.hp < 0.5) {
+hpFill.style.background = 'linear-gradient(90deg, #ffcc00, #ff6600)';
+}
+hpBar.appendChild(hpFill);
+icon.appendChild(hpBar);
+display.appendChild(icon);
+});
+document.getElementById('playerMoney').textContent = '💰 ' + gameState.player.money;
+document.getElementById('playerName').textContent = gameState.player.name;
+document.getElementById('timeDisplay').textContent = `☀️ Día ${gameState.player.day}`;
+}
+
+function toggleMainMenu() {
+document.getElementById('mainMenu').classList.toggle('active');
+}
+
+function closeMainMenu() {
+document.getElementById('mainMenu').classList.remove('active');
+}
+
+function showBag() {
+let content = "🎒 MOCHILA:\n\n";
+content += `🔴 Freekieball: ${gameState.inventory.freekieball}\n`;
+content += `🔵 Superball: ${gameState.inventory.superball}\n`;
+content += `🟣 Ultraball: ${gameState.inventory.ultraball}\n`;
+content += `❤️ Poción: ${gameState.inventory.potion}\n`;
+content += `💖 Superpoción: ${gameState.inventory.superpotion}\n`;
+content += `💗 Hiperpoción: ${gameState.inventory.hyperpotion}\n`;
+content += `✨ Revivir: ${gameState.inventory.revive}\n\n`;
+content += `Dinero: 💰${gameState.player.money.toLocaleString()}\n`;
+content += `Medallas: ${gameState.player.medals.length > 0 ? gameState.player.medals.join(', ') : 'Ninguna'}`;
+alert(content);
+closeMainMenu();
+}
+
+function showPartyScreen() {
+document.getElementById('partyScreen').classList.add('active');
+const list = document.getElementById('partyList');
+list.innerHTML = '';
+gameState.party.forEach((freekie, index) => {
+const member = document.createElement('div');
+member.className = 'partyMember';
+member.innerHTML = `
+<img src="${freekie.sprite}">
+<div class="partyMemberInfo">
+<h3>${freekie.nombre} (Nv.${freekie.nivel})</h3>
+<div class="stats">
+<div>Tipo: ${freekie.tipo}</div>
+<div>HP: ${freekie.currentHP}/${freekie.hp}</div>
+<div>ATQ: ${freekie.ataque}</div>
+<div>DEF: ${freekie.defensa}</div>
+<div>VEL: ${freekie.velocidad}</div>
+<div>EXP: ${freekie.exp || 0}/${freekie.expNext}</div>
+${freekie.evoluciona ? `<div>Evoluciona: Nv.${freekie.evoluciona.nivel}</div>` : ''}
+</div>
+</div>
+`;
+list.appendChild(member);
+});
+closeMainMenu();
+}
+
+function closePartyScreen() {
+document.getElementById('partyScreen').classList.remove('active');
+}
+
+function saveGame() {
+localStorage.setItem('freekiesWorldSave', JSON.stringify(gameState));
+alert("¡Partida guardada exitosamente!");
+closeMainMenu();
+}
+
+function healParty() {
+document.getElementById('healingScreen').classList.add('active');
+setTimeout(() => {
+gameState.party.forEach(f => {
+f.currentHP = f.hp;
+// Curar status effects si los hubiera
+});
+updatePartyDisplay();
+document.getElementById('healingScreen').classList.remove('active');
+showDialog("Cura", "¡Tus Freekies están completamente curados! ¡Buena suerte en tu aventura!", "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/300.png");
+}, 3000);
+}
+
+function toggleAudio() {
+gameState.audio.enabled = !gameState.audio.enabled;
+document.getElementById('audioControl').textContent = gameState.audio.enabled ? '🔊' : '🔇';
+// Feedback visual
+const audioControl = document.getElementById('audioControl');
+audioControl.style.transform = gameState.audio.enabled ? 'scale(1.2)' : 'scale(0.9)';
+setTimeout(() => {
+audioControl.style.transform = 'scale(1)';
+}, 300);
+}
+
+// CONTROLES MEJORADOS
+document.addEventListener('keydown', (e) => {
+if (gameState.screen !== 'game' || gameState.battle.active) return;
+switch(e.key) {
+case 'ArrowUp': case 'w': case 'W':
+movePlayer(0, -1); e.preventDefault(); break;
+case 'ArrowDown': case 's': case 'S':
+movePlayer(0, 1); e.preventDefault(); break;
+case 'ArrowLeft': case 'a': case 'A':
+movePlayer(-1, 0); e.preventDefault(); break;
+case 'ArrowRight': case 'd': case 'D':
+movePlayer(1, 0); e.preventDefault(); break;
+case 'Escape': case 'x': case 'X':
+toggleMainMenu(); e.preventDefault(); break;
+case 'Enter': case ' ': case 'z': case 'Z':
+handleAction(); e.preventDefault(); break;
+case 'h': case 'H':
+healParty(); e.preventDefault(); break;
+}
+});
+
+// Mostrar controles en móvil
+if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+document.getElementById('controls').style.display = 'grid';
+}
+
+// Autoguardado cada 2 minutos
+setInterval(() => {
+if (gameState.screen === 'game' && gameState.party.length > 0) {
+localStorage.setItem('freekiesWorldAutoSave', JSON.stringify(gameState));
+console.log("Autoguardado realizado");
+}
+}, 120000);
+
+// Cargar autoguardado si existe y no hay partida guardada
+window.addEventListener('load', () => {
+if (!localStorage.getItem('freekiesWorldSave') && localStorage.getItem('freekiesWorldAutoSave')) {
+if (confirm("¿Deseas cargar tu última partida autoguardada?")) {
+gameState = JSON.parse(localStorage.getItem('freekiesWorldAutoSave'));
+updateCollisionMap();
+document.getElementById('titleScreen').style.display = 'none';
+document.getElementById('gameScreen').style.display = 'block';
+gameState.screen = "game";
+updatePartyDisplay();
+drawGame();
+}
+}
+});
+
+console.log("🎮 FREEKIES WORLD ULTIMATE v4.1 - ¡Juego mejorado y optimizado!");
+  </script>
+  <!-- === START: Mejoras Mochila / UX Móvil (Pegar al final de index.html) === -->
+
+<!-- Modal mochila (agregar dentro del <body>) -->
+<div id="bagModal" class="bagModal" aria-hidden="true" role="dialog" style="display:none">
+  <script>
+  <div class1="bagContent" style="--bg:#0b1220; --accent:#FFD700;">
+    <div class2="bagHeader" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.03)">
+      <h3 style="margin:0;color:var(--accent);font-family:'Press Start 2P',monospace;font-size:16px;">🎒 Mochila</h3>
+      <button id="closeBagBtn" class3="iconBtn" style="background:transparent;border:none;color:#bfcad3;font-size:20px;cursor:pointer">✕</button>
+    </div>
+
+    <div id="bagTabs" style="display:flex;gap:8px;padding:10px">
+      <button data-tab="items" class4="bagTab active" style="flex:1;padding:8px;border-radius:10px;background:rgba(255,255,255,0.02);font-weight:700">Items</button>
+      <button data-tab="quick" class5="bagTab" style="flex:1;padding:8px;border-radius:10px;background:transparent;font-weight:700">Acceso Rápido</button>
+      <button data-tab="info" class6="bagTab" style="flex:1;padding:8px;border-radius:10px;background:transparent;font-weight:700">Info</button>
+    </div>
+
+    <div id="bagBody" style="padding:10px;max-height:48vh;overflow:auto">
+      <div id="bagItemsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px"></div>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button id="bagUseBtn" class7="menuButton" style="flex:1;padding:10px;border-radius:10px">Usar</button>
+        <button id="bagDropBtn" class8="menuButton" style="flex:1;padding:10px;border-radius:10px;background:linear-gradient(135deg,#FF6B6B,#FF4444)">Desechar</button>
+      </div>
+      <div id="bagQuickBar" style="display:flex;gap:8px;justify-content:center;margin-top:12px"></div>
+    </div>
+  </div>
+</div>
+<script>
+<style>
+/* Minimal styles to integrate con tu CSS existente (collides minimally) */
+.bagModal{position:fixed;left:0;right:0;bottom:0;top:0;display:flex;align-items:flex-end;justify-content:center;padding:12px;z-index:6000}
+.bagContent{width:100%;max-width:720px;border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);backdrop-filter:blur(6px)}
+.bagTab.active{background:linear-gradient(135deg,#112233,#163046);color:var(--accent)}
+.itemCard{background:rgba(255,255,255,0.02);border-radius:10px;padding:8px;text-align:center;cursor:pointer;border:1px solid rgba(255,255,255,0.02);user-select:none}
+.itemCard img{width:48px;height:48px;object-fit:contain;image-rendering:pixelated;display:block;margin:0 auto 6px}
+.itemName{font-size:12px;color:#dfe9f3}
+.itemCount{font-size:12px;color:#9aa5b1;margin-top:4px}
+.itemSelected{outline:3px solid rgba(255,215,0,0.12);box-shadow:0 6px 30px rgba(255,215,0,0.04)}
+@media (max-width:480px){
+  .bagContent{padding:6px}
+  .itemCard img{width:40px;height:40px}
+  #bagItemsGrid{grid-template-columns:repeat(4,1fr)}
+}
+</style>
+
+<script>
+/* === JS: Mochila móvil y mejoras UX touch ===
+   - Sobrescribe showBag() antiguo para mostrar modal (reemplaza alert)
+   - Soporta usar, desechar, quickbar, persistencia en localStorage
+   - Touch: long-press para usar item
+*/
+
+(function(){
+  // Si gameState no existe, no hacemos nada
+  if (typeof window.gameState === 'undefined') window.gameState = window.gameState || { inventory: {} };
+
+  // Item meta (iconos opcionales; puedes usar tus sprites)
+  const itemMeta = {
+    freekieball: { name: "Freekieball", icon: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" },
+    superball:  { name: "Superball",  icon: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/great-ball.png" },
+    ultraball:  { name: "Ultraball",  icon: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ultra-ball.png" },
+    potion:     { name: "Poción",     icon: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/potion.png" },
+    superpotion:{ name: "Súperpoción",icon: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/super-potion.png" },
+    hyperpotion:{ name: "Hiperpoción",icon: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/hyper-potion.png" },
+    revive:     { name: "Revivir",    icon: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/revive.png" }
+  };
+
+  // Elementos
+  const bagModal = document.getElementById('bagModal');
+  const bagItemsGrid = document.getElementById('bagItemsGrid');
+  const bagQuickBar = document.getElementById('bagQuickBar');
+  const closeBagBtn = document.getElementById('closeBagBtn');
+  const bagUseBtn = document.getElementById('bagUseBtn');
+  const bagDropBtn = document.getElementById('bagDropBtn');
+  const tabs = document.querySelectorAll('.bagTab');
+
+  // Estado local
+  let selectedKey = null;
+  window.gameState.quickBar = window.gameState.quickBar || ['potion','freekieball','superball'];
+
+  // Utilities
+  function persist() {
+    try { localStorage.setItem('freekies_bag', JSON.stringify({ inventory: gameState.inventory, quickBar: gameState.quickBar })); } catch(e){}
+  }
+  function loadPersist() {
+    try {
+      const raw = JSON.parse(localStorage.getItem('freekies_bag'));
+      if (raw && raw.inventory) gameState.inventory = Object.assign({}, gameState.inventory, raw.inventory);
+      if (raw && raw.quickBar) gameState.quickBar = raw.quickBar;
+    } catch(e){}
+  }
+
+  // Render
+  function renderBag() {
+    bagItemsGrid.innerHTML = '';
+    const invKeys = Object.keys(gameState.inventory || {});
+    if (invKeys.length === 0) {
+      bagItemsGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#9aa5b1;padding:12px">No tienes items</div>';
+      renderQuickBar();
+      return;
+    }
+    invKeys.forEach(key => {
+      const count = gameState.inventory[key] || 0;
+      const meta = itemMeta[key] || { name: key, icon: '' };
+      const el = document.createElement('div');
+      el.className = 'itemCard';
+      el.dataset.key = key;
+      el.innerHTML = `<img src="${meta.icon}" alt="${meta.name}"><div class="itemName">${meta.name}</div><div class="itemCount">x${count}</div>`;
+      el.addEventListener('click', ()=> selectItem(key, el));
+      // Long-press to use (mobile)
+      let pressTimer = null;
+      el.addEventListener('touchstart', (ev)=> {
+        pressTimer = setTimeout(()=> { useItem(key); flash(el); }, 600);
+      }, {passive:true});
+      el.addEventListener('touchend', ()=> { if (pressTimer) clearTimeout(pressTimer); }, {passive:true});
+      bagItemsGrid.appendChild(el);
+    });
+    renderQuickBar();
+  }
+
+  function renderQuickBar() {
+    bagQuickBar.innerHTML = '';
+    (gameState.quickBar || []).forEach(key => {
+      const meta = itemMeta[key] || { name:key, icon: '' };
+      const slot = document.createElement('div');
+      slot.className = 'quickSlot';
+      slot.style = "width:56px;height:56px;border-radius:12px;background:rgba(255,255,255,0.02);display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,255,255,0.03)";
+      slot.dataset.key = key;
+      slot.innerHTML = meta.icon ? `<img src="${meta.icon}" alt="${meta.name}" style="width:40px;height:40px">` : meta.name;
+      slot.addEventListener('click', ()=> useItem(key));
+      bagQuickBar.appendChild(slot);
+    });
+  }
+
+  function selectItem(key, el) {
+    selectedKey = key;
+    document.querySelectorAll('.itemCard').forEach(c => c.classList.remove('itemSelected'));
+    if (el) el.classList.add('itemSelected');
+  }
+
+  function flash(el) {
+    el.classList.add('itemSelected');
+    setTimeout(()=> el.classList.remove('itemSelected'), 350);
+  }
+
+  function useItem(key) {
+    if (!key) { toast('Selecciona un item'); return; }
+    const count = gameState.inventory[key] || 0;
+    if (count <= 0) { toast('No tienes ' + (itemMeta[key]?.name || key)); return; }
+    // Lógica mínima: consumir item y aplicar efecto simple (curar si es poción)
+    gameState.inventory[key] = Math.max(0, count - 1);
+    // ejemplo de efecto: si es potion -> curar primer freekie
+    if (key === 'potion' || key === 'superpotion' || key === 'hyperpotion') {
+      if (gameState.party && gameState.party[0]) {
+        const target = gameState.party[0];
+        target.currentHP = Math.min(target.hp, (target.currentHP||target.hp) + (key === 'potion' ? 20 : key==='superpotion'?50:120));
+        updatePartyDisplay && updatePartyDisplay(); // si existe, actualiza UI principal
+      }
+    }
+    persist();
+    renderBag();
+    toast((itemMeta[key]?.name || key) + ' usado');
+  }
+
+  function dropItem(key, amount=1) {
+    if (!key) { toast('Selecciona un item'); return; }
+    gameState.inventory[key] = Math.max(0, (gameState.inventory[key]||0) - amount);
+    persist(); renderBag(); toast((itemMeta[key]?.name || key) + ' desechado');
+  }
+
+  // Small toast helper
+  function toast(msg, t=1200) {
+    let el = document.getElementById('bagToast');
+    if (!el) {
+      el = document.createElement('div'); el.id='bagToast';
+      el.style = 'position:fixed;left:50%;transform:translateX(-50%);bottom:90px;background:#0b1220;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);color:#9aa5b1;z-index:7000';
+      document.body.appendChild(el);
+    }
+    el.textContent = msg; el.style.display = 'block';
+    clearTimeout(el._timeout);
+    el._timeout = setTimeout(()=> el.style.display='none', t);
+  }
+
+  // Open/close UI
+  function openBagModal() {
+    loadPersist();
+    renderBag();
+    bagModal.style.display = 'flex';
+    bagModal.setAttribute('aria-hidden','false');
+  }
+  function closeBagModal() {
+    bagModal.style.display = 'none';
+    bagModal.setAttribute('aria-hidden','true');
+  }
+
+  // Replace existing showBag (override earlier function)
+  window.showBag = function() { openBagModal(); closeMainMenu && closeMainMenu(); };
+
+  // Attach events
+  closeBagBtn && closeBagBtn.addEventListener('click', closeBagModal);
+  bagUseBtn && bagUseBtn.addEventListener('click', ()=> useItem(selectedKey));
+  bagDropBtn && bagDropBtn.addEventListener('click', ()=> dropItem(selectedKey,1));
+  tabs.forEach(t => t.addEventListener('click', (ev)=>{
+    tabs.forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    const which = t.dataset.tab;
+    if (which === 'quick') { bagItemsGrid.style.display='none'; bagQuickBar.style.display='flex'; }
+    else { bagItemsGrid.style.display='grid'; bagQuickBar.style.display='flex'; }
+  }));
+
+  // Gestos móviles básicos: doble-tap en canvas para abrir mochila, swipe para moverse
+  (function attachMobileGestures(){
+    const canvas = document.getElementById('gameCanvas');
+    if (!canvas) return;
+    let lastTap = 0, startX=0, startY=0, touchStartTime=0;
+    canvas.addEventListener('touchstart', (e)=> {
+      const t = e.touches[0];
+      const now = Date.now();
+      if (now - lastTap < 300) { openBagModal(); }
+      lastTap = now;
+      startX = t.clientX; startY = t.clientY; touchStartTime = now;
+    }, {passive:true});
+    canvas.addEventListener('touchend', (e)=> {
+      const t = e.changedTouches[0];
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+      const dt = Date.now() - touchStartTime;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+        if (dx > 0) movePlayer && movePlayer(1,0);
+        else movePlayer && movePlayer(-1,0);
+      } else if (Math.abs(dy) > 40 && Math.abs(dy) > Math.abs(dx)) {
+        if (dy > 0) movePlayer && movePlayer(0,1);
+        else movePlayer && movePlayer(0,-1);
+      } else {
+        // tap -> action
+        handleAction && handleAction();
+      }
+    }, {passive:true});
+  })();
+
+  // Init load
+  loadPersist();
+
+  // Expose helpers (opcional)
+  window._bag = { open: openBagModal, close: closeBagModal, useItem, dropItem, render: renderBag };
+
+})();
+</script>
+
+<!-- === END: Mejoras Mochila / UX Móvil === -->
+
+  <script>
+// 🔥 FIX BOTÓN JUGAR
+
+document.addEventListener("DOMContentLoaded", () => {
+  const playBtn = document.getElementById("playBtn");
+  if (playBtn) {
+    playBtn.onclick = function () {
+      const startScreen = document.getElementById("startScreen");
+      if (startScreen) startScreen.style.display = "none";
+
+      if (typeof initGame === "function") {
+        initGame();
+      } else if (typeof gameLoop === "function") {
+        gameLoop();
+      }
+    };
+  }
+});
+    ```javascript
+/* ===== MEJORAS AAA V10.0 ===== 
+   Efectos visuales avanzados, partículas, animaciones, feedback mejorado
+   Sistema de logros, combos, críticos, y optimizaciones de rendimiento
+   TODO ENCAPSULADO - NO MODIFICA CÓDIGO EXISTENTE
+*/
+
+(function AAA_ENHANCEMENT_V10() {
+  'use strict';
+  
+  // ===== SISTEMA DE PARTÍCULAS =====
+  const ParticleSystem = {
+    particles: [],
+    maxParticles: 150,
+    canvas: null,
+    ctx: null,
+    
+    init(gameCanvas) {
+      this.canvas = gameCanvas;
+      this.ctx = gameCanvas.getContext('2d');
+      this.particles = [];
+      requestAnimationFrame(() => this.render());
+    },
+    
+    emit(x, y, type = 'spark', count = 8) {
+      for (let i = 0; i < count; i++) {
+        if (this.particles.length >= this.maxParticles) this.particles.shift();
+        
+        const angle = (Math.PI * 2 * i) / count;
+        const velocity = 3 + Math.random() * 4;
+        
+        const particle = {
+          x, y,
+          vx: Math.cos(angle) * velocity,
+          vy: Math.sin(angle) * velocity,
+          life: 1,
+          decay: 0.015 + Math.random() * 0.01,
+          type,
+          gravity: type === 'smoke' ? 0.05 : 0.15,
+          size: type === 'spark' ? 3 : 5,
+          color: this.getColor(type)
+        };
+        
+        this.particles.push(particle);
+      }
+    },
+    
+    getColor(type) {
+      const colors = {
+        spark: `hsl(${Math.random() * 60 + 30}, 100%, 60%)`,
+        heal: '#95E1D3',
+        damage: '#FF6B6B',
+        critical: '#FFD700',
+        smoke: 'rgba(200, 200, 200, 0.6)'
+      };
+      return colors[type] || colors.spark;
+    },
+    
+    update() {
+      this.particles = this.particles.filter(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += p.gravity;
+        p.life -= p.decay;
+        return p.life > 0;
+      });
+    },
+    
+    render() {
+      this.update();
+      
+      this.particles.forEach(p => {
+        this.ctx.save();
+        this.ctx.globalAlpha = p.life * 0.8;
+        this.ctx.fillStyle = p.color;
+        this.ctx.beginPath();
+        this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.restore();
+      });
+      
+      requestAnimationFrame(() => this.render());
+    }
+  };
+  
+  // ===== SISTEMA DE EFECTOS DE PANTALLA =====
+  const ScreenEffects = {
+    canvas: null,
+    ctx: null,
+    shakeIntensity: 0,
+    shakeDecay: 0.95,
+    flashAlpha: 0,
+    flashColor: 'white',
+    
+    init(gameCanvas) {
+      this.canvas = gameCanvas;
+      this.ctx = gameCanvas.getContext('2d');
+      this.update();
+    },
+    
+    shake(intensity = 10, duration = 200) {
+      this.shakeIntensity = intensity;
+      setTimeout(() => { this.shakeIntensity = 0; }, duration);
+    },
+    
+    flash(color = 'white', duration = 100) {
+      this.flashColor = color;
+      this.flashAlpha = 0.6;
+      setTimeout(() => { this.flashAlpha = 0; }, duration);
+    },
+    
+    getShakeOffset() {
+      if (this.shakeIntensity <= 0.1) {
+        this.shakeIntensity = 0;
+        return { x: 0, y: 0 };
+      }
+      
+      this.shakeIntensity *= this.shakeDecay;
+      return {
+        x: (Math.random() - 0.5) * this.shakeIntensity,
+        y: (Math.random() - 0.5) * this.shakeIntensity
+      };
+    },
+    
+    update() {
+      if (this.flashAlpha > 0) {
+        this.ctx.save();
+        this.ctx.fillStyle = this.flashColor;
+        this.ctx.globalAlpha = this.flashAlpha;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.restore();
+        this.flashAlpha -= 0.05;
+      }
+      
+      requestAnimationFrame(() => this.update());
+    }
+  };
+  
+  // ===== SISTEMA DE LOGROS =====
+  const AchievementSystem = {
+    achievements: {
+      firstVictory: { name: '¡Primera Victoria!', desc: 'Gana tu primera batalla', unlocked: false },
+      hatTrick: { name: 'Hat Trick', desc: 'Gana 3 batallas seguidas sin perder', unlocked: false },
+      criticalMaster: { name: 'Crítico Maestro', desc: 'Realiza 10 golpes críticos', unlocked: false },
+      levelUp20: { name: 'Experto', desc: 'Lleva un Freekie a nivel 20', unlocked: false },
+      comboKing: { name: 'Combo King', desc: 'Consigue un combo de 5+', unlocked: false },
+      treasureHunter: { name: 'Cazador de Tesoros', desc: 'Abre 20 cofres', unlocked: false },
+      speedRunner: { name: 'Corredor Rápido', desc: 'Gana una batalla en menos de 30 segundos', unlocked: false },
+      fullParty: { name: 'Equipo Completo', desc: 'Captura 6 Freekies diferentes', unlocked: false }
+    },
+    
+    stats: {
+      victories: 0,
+      winStreak: 0,
+      criticals: 0,
+      combos: 0,
+      chestOpened: 0,
+      captureCount: 0,
+      maxLevel: 1
+    },
+    
+    init() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('freekies_achievements'));
+        if (saved) {
+          Object.assign(this.achievements, saved.achievements);
+          Object.assign(this.stats, saved.stats);
+        }
+      } catch(e) {}
+    },
+    
+    unlock(key) {
+      if (this.achievements[key] && !this.achievements[key].unlocked) {
+        this.achievements[key].unlocked = true;
+        this.showNotification(this.achievements[key]);
+        this.save();
+      }
+    },
+    
+    addStat(key, value = 1) {
+      if (this.stats.hasOwnProperty(key)) {
+        this.stats[key] += value;
+        this.checkAchievements();
+        this.save();
+      }
+    },
+    
+    setStat(key, value) {
+      if (this.stats.hasOwnProperty(key)) {
+        this.stats[key] = Math.max(this.stats[key], value);
+        this.checkAchievements();
+        this.save();
+      }
+    },
+    
+    checkAchievements() {
+      if (this.stats.victories === 1) this.unlock('firstVictory');
+      if (this.stats.winStreak >= 3) this.unlock('hatTrick');
+      if (this.stats.criticals >= 10) this.unlock('criticalMaster');
+      if (this.stats.maxLevel >= 20) this.unlock('levelUp20');
+      if (this.stats.combos >= 5) this.unlock('comboKing');
+      if (this.stats.chestOpened >= 20) this.unlock('treasureHunter');
+      if (this.stats.captureCount >= 6) this.unlock('fullParty');
+    },
+    
+    showNotification(achievement) {
+      const notif = document.createElement('div');
+      notif.style = `
+        position: fixed; top: 20px; right: 20px; z-index: 9999;
+        background: linear-gradient(135deg, #FFD700, #FFA500);
+        color: #1a1a2e; padding: 20px 30px;
+        border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        font-family: 'Press Start 2P', monospace; font-size: 12px;
+        text-align: center; max-width: 300px;
+        animation: slideInRight 0.5s ease-out;
+      `;
+      notif.innerHTML = `
+        <div style="font-weight: bold; margin-bottom: 5px;">🏆 LOGRO DESBLOQUEADO</div>
+        <div style="font-size: 14px; font-weight: bold;">${achievement.name}</div>
+        <div style="font-size: 10px; margin-top: 5px; opacity: 0.8;">${achievement.desc}</div>
+      `;
+      document.body.appendChild(notif);
+      
+      setTimeout(() => {
+        notif.style.animation = 'slideOutRight 0.5s ease-in';
+        setTimeout(() => notif.remove(), 500);
+      }, 3000);
+    },
+    
+    save() {
+      try {
+        localStorage.setItem('freekies_achievements', JSON.stringify({
+          achievements: this.achievements,
+          stats: this.stats
+        }));
+      } catch(e) {}
+    }
+  };
+  
+  // ===== SISTEMA DE COMBOS =====
+  const ComboSystem = {
+    comboCount: 0,
+    comboTimer: null,
+    comboDisplay: null,
+    
+    init() {
+      const display = document.createElement('div');
+      display.id = 'comboDisplay';
+      display.style = `
+        position: absolute; top: 100px; left: 50%; transform: translateX(-50%);
+        font-family: 'Press Start 2P', monospace; font-size: 32px;
+        color: #FFD700; text-shadow: 0 0 20px #FFD700;
+        opacity: 0; pointer-events: none; z-index: 500;
+        animation: comboFloat 0.8s ease-out forwards;
+      `;
+      document.getElementById('gameScreen')?.appendChild(display);
+      this.comboDisplay = display;
+    },
+    
+    hit() {
+      this.comboCount++;
+      this.updateDisplay();
+      
+      clearTimeout(this.comboTimer);
+      this.comboTimer = setTimeout(() => {
+        if (this.comboCount > 1) {
+          AchievementSystem.setStat('combos', this.comboCount);
+        }
+        this.reset();
+      }, 3000);
+    },
+    
+    updateDisplay() {
+      if (this.comboDisplay) {
+        this.comboDisplay.textContent = `COMBO x${this.comboCount}`;
+        this.comboDisplay.style.animation = 'none';
+        setTimeout(() => {
+          this.comboDisplay.style.animation = 'comboFloat 0.8s ease-out forwards';
+        }, 10);
+      }
+    },
+    
+    reset() {
+      this.comboCount = 0;
+      if (this.comboDisplay) {
+        this.comboDisplay.style.opacity = '0';
+      }
+    }
+  };
+  
+  // ===== ENHANCED DAMAGE NUMBERS =====
+  const DamageNumbers = {
+    active: [],
+    
+    show(x, y, damage, isCritical = false) {
+      const num = document.createElement('div');
+      num.textContent = isCritical ? `${damage}!` : `${damage}`;
+      num.style = `
+        position: absolute; left: ${x}px; top: ${y}px;
+        font-family: 'Press Start 2P', monospace; font-size: ${isCritical ? 24 : 16}px;
+        color: ${isCritical ? '#FFD700' : '#FF6B6B'};
+        text-shadow: ${isCritical ? '0 0 10px #FFD700' : '0 0 5px #FF0000'};
+        font-weight: bold; pointer-events: none; z-index: 1000;
+        animation: ${isCritical ? 'criticalFloat' : 'damageFloat'} 1s ease-out forwards;
+      `;
+      
+      document.getElementById('gameScreen')?.appendChild(num);
+      this.active.push(num);
+      
+      setTimeout(() => {
+        num.remove();
+        this.active = this.active.filter(n => n !== num);
+      }, 1000);
+    }
+  };
+  
+  // ===== ENHANCED VISUAL EFFECTS =====
+  const VisualEffects = {
+    addGlow(element, color = '#FF6B6B', size = 10) {
+      element.style.boxShadow = `0 0 ${size}px ${color}, inset 0 0 ${size}px ${color}`;
+    },
+    
+    removeGlow(element) {
+      element.style.boxShadow = '';
+    },
+    
+    pulse(element, duration = 300) {
+      element.style.animation = `pulse ${duration}ms ease-in-out`;
+      setTimeout(() => {
+        element.style.animation = '';
+      }, duration);
+    },
+    
+    scale(element, fromScale = 1.2, toScale = 1, duration = 300) {
+      element.style.transform = `scale(${fromScale})`;
+      element.style.transition = `transform ${duration}ms cubic-bezier(0.34, 1.56, 0.64, 1)`;
+      
+      requestAnimationFrame(() => {
+        element.style.transform = `scale(${toScale})`;
+      });
+      
+      setTimeout(() => {
+        element.style.transition = '';
+      }, duration);
+    }
+  };
+  
+  // ===== OPTIMIZER & SMOOTHING =====
+  const PerformanceOptimizer = {
+    lastFrameTime: 0,
+    fps: 60,
+    deltaTime: 0,
+    
+    update() {
+      const now = performance.now();
+      this.deltaTime = (now - this.lastFrameTime) / 1000;
+      this.lastFrameTime = now;
+      
+      if (this.deltaTime > 0.016) {
+        this.fps = Math.round(1 / this.deltaTime);
+      }
+    },
+    
+    getSmoothedValue(current, target, smoothness = 0.1) {
+      return current + (target - current) * Math.min(smoothness, this.deltaTime * 5);
+    }
+  };
+  
+  // ===== ENHANCED AUDIO SYSTEM =====
+  const AudioEnhancer = {
+    audioContext: null,
+    gainNode: null,
+    enabled: true,
+    
+    init() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        this.audioContext = new AudioContext();
+        this.gainNode = this.audioContext.createGain();
+        this.gainNode.connect(this.audioContext.destination);
+        this.gainNode.gain.value = 0.3;
+      } catch(e) {
+        console.log('Audio context not available');
+      }
+    },
+    
+    playTone(frequency = 440, duration = 100, type = 'sine') {
+      if (!this.audioContext) return;
+      
+      const oscillator = this.audioContext.createOscillator();
+      const envelope = this.audioContext.createGain();
+      
+      oscillator.connect(envelope);
+      envelope.connect(this.gainNode);
+      
+      oscillator.type = type;
+      oscillator.frequency.value = frequency;
+      
+      envelope.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+      envelope.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration / 1000);
+      
+      oscillator.start(this.audioContext.currentTime);
+      oscillator.stop(this.audioContext.currentTime + duration / 1000);
+    },
+    
+    playCritical() {
+      this.playTone(800, 150, 'sine');
+      setTimeout(() => this.playTone(1000, 100, 'sine'), 75);
+    },
+    
+    playDamage() {
+      this.playTone(200, 50, 'square');
+    },
+    
+    playHeal() {
+      this.playTone(600, 100, 'sine');
+      setTimeout(() => this.playTone(800, 100, 'sine'), 50);
+    }
+  };
+  
+  // ===== CSS ANIMATIONS INJECTION =====
+  function injectAnimations() {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-30px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      @keyframes slideInRight {
+        from { opacity: 0; transform: translateX(100px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+      
+      @keyframes slideOutRight {
+        from { opacity: 1; transform: translateX(0); }
+        to { opacity: 0; transform: translateX(100px); }
+      }
+      
+      @keyframes damageFloat {
+        0% { opacity: 1; transform: translateY(0) scale(1); }
+        100% { opacity: 0; transform: translateY(-60px) scale(0.8); }
+      }
+      
+      @keyframes criticalFloat {
+        0% { opacity: 1; transform: translateY(0) scale(1.2); }
+        50% { transform: translateY(-30px) scale(1.3); }
+        100% { opacity: 0; transform: translateY(-80px) scale(0.9); }
+      }
+      
+      @keyframes comboFloat {
+        0% { opacity: 1; transform: translateX(-50%) scale(0.5); }
+        50% { transform: translateX(-50%) scale(1.1); }
+        100% { opacity: 0; transform: translateX(-50%) scale(1); }
+      }
+      
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+      }
+      
+      @keyframes pixelBounce {
+        0%, 100% { transform: translateY(0); }
+        25% { transform: translateY(-8px); }
+        50% { transform: translateY(0); }
+        75% { transform: translateY(-4px); }
+      }
+      
+      @keyframes glitch {
+        0% { clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%); }
+        25% { clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%); }
+        50% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+        75% { clip-path: polygon(0 10%, 100% 10%, 100% 80%, 0 80%); }
+        100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+      }
+      
+      @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+      }
+      
+      @keyframes glow {
+        0%, 100% { text-shadow: 0 0 10px currentColor; }
+        50% { text-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
+      }
+      
+      .enhanced-button {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+      }
+      
+      .enhanced-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: left 0.5s ease;
+        z-index: -1;
+      }
+      
+      .enhanced-button:hover::before {
+        left: 100%;
+      }
+      
+      .card-tilt {
+        perspective: 1000px;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      
+      .card-tilt:hover {
+        transform: rotateY(5deg) rotateX(-5deg);
+      }
+      
+      #gameUI {
+        backdrop-filter: blur(8px);
+      }
+      
+      @supports not (backdrop-filter: blur(8px)) {
+        #gameUI {
+          background: rgba(0, 0, 0, 0.8);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  // ===== INTEGRATION WITH BATTLE SYSTEM =====
+  function hookBattleSystem() {
+    const originalDealDamage = window.dealDamage;
+    if (originalDealDamage) {
+      window.dealDamage = function(attacker, defender, damage, isCritical = false) {
+        // Call original
+        const result = originalDealDamage.call(this, attacker, defender, damage, isCritical);
+        
+        // Add visual enhancements
+        if (isCritical) {
+          AudioEnhancer.playCritical();
+          AchievementSystem.addStat('criticals');
+          ComboSystem.hit();
+          
+          const defenderElement = document.querySelector('[data-defender]');
+          if (defenderElement) {
+            VisualEffects.pulse(defenderElement, 200);
+            ScreenEffects.flash('#FFD700', 150);
+            ParticleSystem.emit(
+              defenderElement.offsetLeft + 50,
+              defenderElement.offsetTop + 50,
+              'critical',
+              12
+            );
+          }
+        } else {
+          AudioEnhancer.playDamage();
+          ComboSystem.hit();
+          ParticleSystem.emit(
+            Math.random() * window.innerWidth,
+            Math.random() * window.innerHeight * 0.6,
+            'damage',
+            5
+          );
+        }
+        
+        DamageNumbers.show(
+          Math.random() * 200 + 100,
+          Math.random() * 100 + 50,
+          damage,
+          isCritical
+        );
+        
+        ScreenEffects.shake(isCritical ? 15 : 8);
+        return result;
+      };
+    }
+  }
+  
+  // ===== INITIALIZATION =====
+  function initialize() {
+    injectAnimations();
+    AchievementSystem.init();
+    AudioEnhancer.init();
+    
+    // Wait for canvas
+    const waitForCanvas = setInterval(() => {
+      const gameCanvas = document.getElementById('gameCanvas');
+      if (gameCanvas) {
+        clearInterval(waitForCanvas);
+        ParticleSystem.init(gameCanvas);
+        ScreenEffects.init(gameCanvas);
+        ComboSystem.init();
+        hookBattleSystem();
+        
+        // Smooth canvas rendering
+        const ctx = gameCanvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+      }
+    }, 100);
+    
+    // Global access
+    window.AAA = {
+      particles: ParticleSystem,
+      effects: ScreenEffects,
+      visual: VisualEffects,
+      audio: AudioEnhancer,
+      combo: ComboSystem,
+      achievements: AchievementSystem,
+      damage: DamageNumbers
+    };
+  }
+  
+  // Start when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialize);
+  } else {
+    initialize();
+  }
+})();
+
+/* ===== QUALITY OF LIFE IMPROVEMENTS ===== */
+(function QOL() {
+  'use strict';
+  
+  // Smooth transitions for UI elements
+  document.addEventListener('DOMContentLoaded', () => {
+    const style = document.createElement('style');
+    style.textContent = `
+      * {
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      #gameUI > div {
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+      
+      .menuButton {
+        transform-origin: center;
+        will-change: transform;
+      }
+      
+      #gameCanvas {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+      }
+      
+      /* Mobile improvements */
+      @media (max-width: 768px) {
+        .menuButton {
+          min-height: 60px;
+          font-size: 14px;
+          padding: 15px 20px;
+        }
+        
+        * {
+          -webkit-user-select: none;
+          user-select: none;
+        }
+        
+        button, a {
+          -webkit-user-select: none;
+          user-select: none;
+        }
+      }
+      
+      /* Prevent layout shift */
+      html {
+        scrollbar-gutter: stable;
+      }
+      
+      /* Smooth scrolling */
+      html {
+        scroll-behavior: smooth;
+      }
+      
+      /* Better focus states */
+      button:focus-visible {
+        outline: 3px solid #FFD700;
+        outline-offset: 2px;
+      }
+      
+      /* Reduce motion for accessibility */
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  });
+})();
+```
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
 <div id="gameContainer">
 <!-- PANTALLA DE TÍTULO -->
 <div id="titleScreen">
