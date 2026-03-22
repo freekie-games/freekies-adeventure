@@ -7464,6 +7464,355 @@ Movement: PlayerMovementEffects
 <!-- ===================================================== -->
 <!-- FIN DEL BUGFIX + MEJORAS AMBIENTE v6.0 -->
 <!-- ===================================================== -->
+  <!-- ===================================================== -->
+<!-- FREEKIES WORLD - MINIMAPA MEJORADO v7.0 -->
+<!-- AGREGA LEYENDA + LIMPIA MAPA - SIN ALTERAR JUEGO -->
+<!-- ===================================================== -->
+<script>
+(function EnhancedMinimap() {
+'use strict';
+console.log('🗺️ Enhanced Minimap v7.0 loading...');
+
+// ===== 1. LEYENDA DEL MINIMAPA =====
+const MinimapLegend = {
+legendElement: null,
+init() {
+// Crear leyenda flotante
+this.legendElement = document.createElement('div');
+this.legendElement.id = 'minimapLegend';
+this.legendElement.style.cssText = `
+position: fixed;
+bottom: 150px;
+left: 20px;
+background: linear-gradient(135deg, rgba(0,0,0,0.95), rgba(20,20,40,0.95));
+border: 3px solid #FFD700;
+border-radius: 15px;
+padding: 15px;
+z-index: 151;
+display: none;
+font-family: 'VT323', monospace;
+font-size: 14px;
+color: #fff;
+min-width: 180px;
+box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+backdrop-filter: blur(10px);
+`;
+this.legendElement.innerHTML = `
+<div style="color: #FFD700; font-family: 'Press Start 2P'; font-size: 12px; margin-bottom: 10px; text-align: center;">
+📍 LEYENDA
+</div>
+<div style="display: flex; align-items: center; gap: 8px; margin: 5px 0;">
+<div style="width: 12px; height: 12px; background: #FFD700; border-radius: 50%; border: 2px solid #fff;"></div>
+<span>Tú (Jugador)</span>
+</div>
+<div style="display: flex; align-items: center; gap: 8px; margin: 5px 0;">
+<div style="width: 12px; height: 12px; background: #FF6B6B; border-radius: 50%; border: 2px solid #fff;"></div>
+<span>Gimnasio</span>
+</div>
+<div style="display: flex; align-items: center; gap: 8px; margin: 5px 0;">
+<div style="width: 12px; height: 12px; background: #FFD700; border-radius: 3px; border: 2px solid #000;"></div>
+<span>Ciudad</span>
+</div>
+<div style="display: flex; align-items: center; gap: 8px; margin: 5px 0;">
+<div style="width: 12px; height: 12px; background: #2D8B2D; border-radius: 3px; border: 2px solid #1a5c1a;"></div>
+<span>Hierba Alta</span>
+</div>
+<div style="display: flex; align-items: center; gap: 8px; margin: 5px 0;">
+<div style="width: 12px; height: 12px; background: #FF69B4; border-radius: 50%; border: 2px solid #000;"></div>
+<span>NPC</span>
+</div>
+<div style="margin-top: 10px; padding-top: 10px; border-top: 2px solid #FFD700; font-size: 12px; color: #aaa; text-align: center;">
+Presiona M para mostrar/ocultar
+</div>
+`;
+document.getElementById('gameScreen')?.appendChild(this.legendElement);
+console.log('✅ MinimapLegend initialized');
+},
+toggle(show) {
+if (this.legendElement) {
+this.legendElement.style.display = show ? 'block' : 'none';
+}
+}
+};
+
+// ===== 2. MAPA LIMPIO (MENOS CARGADO) =====
+const CleanMap = {
+init() {
+// Hook en drawGame para limpiar visuales
+const originalDraw = window.drawGame;
+if (originalDraw) {
+window.drawGame = function() {
+// Llamar función original
+originalDraw.call(this);
+// Aplicar limpieza visual
+CleanMap.applyCleanVisuals();
+};
+}
+console.log('✅ CleanMap initialized');
+},
+applyCleanVisuals() {
+// Reducir opacidad de elementos secundarios
+const canvas = document.getElementById('gameCanvas');
+if (!canvas) return;
+const ctx = canvas.getContext('2d');
+// No modificar el canvas directamente aquí para no interferir
+// Los cambios visuales se aplican via CSS overlays
+}
+};
+
+// ===== 3. MINIMAPA MEJORADO =====
+const EnhancedMinimap = {
+minimapElement: null,
+init() {
+// Esperar a que exista el minimap original
+const waitForMinimap = setInterval(() => {
+this.minimapElement = document.getElementById('minimap');
+if (this.minimapElement) {
+clearInterval(waitForMinimap);
+// Mejorar estilo del minimap existente
+this.minimapElement.style.cssText = `
+position: fixed;
+bottom: 20px;
+left: 20px;
+width: 140px;
+height: 140px;
+background: linear-gradient(135deg, rgba(10,15,30,0.95), rgba(20,30,50,0.9));
+border: 3px solid #FFD700;
+border-radius: 15px;
+z-index: 150;
+display: none;
+box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+backdrop-filter: blur(10px);
+overflow: hidden;
+`;
+// Agregar título al minimap
+const title = document.createElement('div');
+title.style.cssText = `
+position: absolute;
+top: 5px;
+left: 50%;
+transform: translateX(-50%);
+color: #FFD700;
+font-family: 'Press Start 2P';
+font-size: 8px;
+z-index: 152;
+text-shadow: 0 0 5px #FFD700;
+`;
+title.textContent = 'MAPA';
+this.minimapElement.appendChild(title);
+console.log('✅ EnhancedMinimap initialized');
+}
+}, 100);
+},
+render() {
+const minimap = document.getElementById('minimap');
+if (!minimap || !gameState?.player) return;
+minimap.innerHTML = '';
+// Re-agregar título
+const title = document.createElement('div');
+title.style.cssText = `
+position: absolute;
+top: 5px;
+left: 50%;
+transform: translateX(-50%);
+color: #FFD700;
+font-family: 'Press Start 2P';
+font-size: 8px;
+z-index: 152;
+text-shadow: 0 0 5px #FFD700;
+`;
+title.textContent = 'MAPA';
+minimap.appendChild(title);
+const scale = 2.5;
+// Jugador
+const playerDot = document.createElement('div');
+playerDot.style.cssText = `
+position: absolute;
+left: ${gameState.player.x * scale}px;
+top: ${gameState.player.y * scale}px;
+width: 6px;
+height: 6px;
+background: #FFD700;
+border-radius: 50%;
+transform: translate(-50%, -50%);
+box-shadow: 0 0 8px #FFD700;
+z-index: 153;
+animation: pulse 1.5s infinite;
+`;
+minimap.appendChild(playerDot);
+// Gimnasios (solo cercanos)
+if (typeof gyms !== 'undefined') {
+gyms.forEach(gym => {
+const dx = gym.x - gameState.player.x;
+const dy = gym.y - gameState.player.y;
+if (Math.abs(dx) < 25 && Math.abs(dy) < 25) {
+const gymDot = document.createElement('div');
+gymDot.style.cssText = `
+position: absolute;
+left: ${gym.x * scale}px;
+top: ${gym.y * scale}px;
+width: 8px;
+height: 8px;
+background: #FF6B6B;
+border-radius: 50%;
+transform: translate(-50%, -50%);
+border: 2px solid #fff;
+box-shadow: 0 0 6px #FF6B6B;
+z-index: 152;
+`;
+gymDot.title = `${gym.nombre} (Líder: ${gym.lider})`;
+minimap.appendChild(gymDot);
+}
+});
+}
+// Ciudades (solo cercanas)
+const cities = [
+{ name: "Start", x: 25, y: 25, color: '#FFD700' },
+{ name: "Fuego", x: 15, y: 10, color: '#FF6347' },
+{ name: "Agua", x: 30, y: 15, color: '#4169E1' },
+{ name: "Planta", x: 20, y: 35, color: '#32CD32' }
+];
+cities.forEach(city => {
+const dx = city.x - gameState.player.x;
+const dy = city.y - gameState.player.y;
+if (Math.abs(dx) < 25 && Math.abs(dy) < 25) {
+const cityDot = document.createElement('div');
+cityDot.style.cssText = `
+position: absolute;
+left: ${city.x * scale}px;
+top: ${city.y * scale}px;
+width: 10px;
+height: 10px;
+background: ${city.color};
+border-radius: 3px;
+transform: translate(-50%, -50%);
+border: 2px solid #000;
+box-shadow: 0 0 5px ${city.color};
+z-index: 151;
+`;
+cityDot.title = city.name;
+minimap.appendChild(cityDot);
+}
+});
+// NPCs (solo cercanos)
+if (typeof npcs !== 'undefined') {
+npcs.forEach(npc => {
+const dx = npc.x - gameState.player.x;
+const dy = npc.y - gameState.player.y;
+if (Math.abs(dx) < 20 && Math.abs(dy) < 20) {
+const npcDot = document.createElement('div');
+npcDot.style.cssText = `
+position: absolute;
+left: ${npc.x * scale}px;
+top: ${npc.y * scale}px;
+width: 5px;
+height: 5px;
+background: #FF69B4;
+border-radius: 50%;
+transform: translate(-50%, -50%);
+border: 1px solid #000;
+z-index: 150;
+opacity: 0.7;
+`;
+npcDot.title = npc.name;
+minimap.appendChild(npcDot);
+}
+});
+}
+}
+};
+
+// ===== 4. CSS ANIMATIONS =====
+const MinimapStyles = {
+init() {
+const style = document.createElement('style');
+style.textContent = `
+@keyframes pulse {
+0%, 100% {
+transform: translate(-50%, -50%) scale(1);
+box-shadow: 0 0 8px #FFD700;
+}
+50% {
+transform: translate(-50%, -50%) scale(1.3);
+box-shadow: 0 0 15px #FFD700;
+}
+}
+#minimapLegend {
+transition: opacity 0.3s ease;
+}
+#minimapLegend:hover {
+opacity: 1;
+}
+/* Mapa menos cargado - reducir opacidad de elementos de fondo */
+#gameCanvas {
+filter: contrast(1.1) saturate(0.9);
+}
+/* Grid más sutil */
+.mapGrid {
+opacity: 0.3 !important;
+}
+`;
+document.head.appendChild(style);
+console.log('✅ MinimapStyles initialized');
+}
+};
+
+// ===== 5. INTEGRACIÓN CON TECLA M =====
+const MinimapToggle = {
+init() {
+const originalKeyHandler = document.onkeydown;
+document.addEventListener('keydown', (e) => {
+if (e.key.toLowerCase() === 'm' && gameState?.screen === 'game') {
+const minimap = document.getElementById('minimap');
+if (minimap) {
+const isShowing = minimap.style.display !== 'none';
+minimap.style.display = isShowing ? 'none' : 'block';
+MinimapLegend.toggle(!isShowing);
+if (!isShowing) {
+EnhancedMinimap.render();
+}
+}
+}
+});
+console.log('✅ MinimapToggle initialized');
+}
+};
+
+// ===== INICIALIZACIÓN =====
+function initAll() {
+const initInterval = setInterval(() => {
+if (typeof gameState !== 'undefined') {
+clearInterval(initInterval);
+MinimapLegend.init();
+CleanMap.init();
+EnhancedMinimap.init();
+MinimapStyles.init();
+MinimapToggle.init();
+console.log('✅✅✅ Enhanced Minimap v7.0 FULLY LOADED! ✅✅✅');
+console.log('🗺️ Leyenda del minimapa: AGREGADA');
+console.log('🎨 Mapa más limpio: ACTIVADO');
+console.log('💡 Tip: Presiona M para mostrar/ocultar minimapa + leyenda');
+}
+}, 100);
+}
+if (document.readyState === 'loading') {
+document.addEventListener('DOMContentLoaded', initAll);
+} else {
+initAll();
+}
+// Exponer para debugging
+window.EnhancedMinimap = {
+Legend: MinimapLegend,
+Clean: CleanMap,
+Map: EnhancedMinimap,
+Styles: MinimapStyles,
+Toggle: MinimapToggle
+};
+})();
+</script>
+<!-- ===================================================== -->
+<!-- FIN DEL MINIMAPA MEJORADO v7.0 -->
+<!-- ===================================================== -->
 </body>
 </html>
 
