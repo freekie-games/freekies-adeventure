@@ -6371,6 +6371,662 @@ document.addEventListener("DOMContentLoaded", () => {
 })();
 ```
 </script>
+  <!-- ===================================================== -->
+<!-- FREEKIES WORLD ENHANCEMENT PACK v5.0 -->
+<!-- AGREGA FUNCIONALIDADES SIN ALTERAR EL JUEGO ORIGINAL -->
+<!-- ===================================================== -->
+<script>
+(function EnhancementPack() {
+    'use strict';
+    
+    console.log('🚀 Freekies Enhancement Pack v5.0 loading...');
+    
+    // ===== 1. SISTEMA DE CAMBIO DE FREEKIE EN COMBATE =====
+    const SwitchSystem = {
+        init() {
+            // Hook para detectar cuando inicia una batalla
+            const originalStartBattle = window.startBattle;
+            if (originalStartBattle) {
+                window.startBattle = function(enemy, isWild, gym = null) {
+                    originalStartBattle.call(this, enemy, isWild, gym);
+                    SwitchSystem.onBattleStart(isWild);
+                };
+            }
+        },
+        
+        onBattleStart(isWild) {
+            const actionsDiv = document.getElementById('battleActions');
+            if (!actionsDiv) return;
+            
+            // Verificar si el botón ya existe
+            if (document.getElementById('switchBtn')) return;
+            
+            // Agregar botón de cambiar
+            const switchBtn = document.createElement('button');
+            switchBtn.id = 'switchBtn';
+            switchBtn.className = 'actionBtn';
+            switchBtn.innerHTML = '🔄 CAMBIAR';
+            switchBtn.style.background = 'linear-gradient(135deg, #9b59b6, #8e44ad)';
+            switchBtn.onclick = () => SwitchSystem.openSwitchMenu();
+            
+            // Insertar antes del botón "HUIR"
+            const fleeBtn = Array.from(actionsDiv.children).find(btn => btn.textContent.includes('HUIR'));
+            if (fleeBtn) {
+                actionsDiv.insertBefore(switchBtn, fleeBtn);
+            } else {
+                actionsDiv.appendChild(switchBtn);
+            }
+        },
+        
+        openSwitchMenu() {
+            if (!gameState.party || gameState.party.length <= 1) {
+                document.getElementById('battleText').textContent = "¡Solo tienes un Freekie en tu equipo!";
+                return;
+            }
+            
+            // Crear overlay de selección
+            const overlay = document.createElement('div');
+            overlay.id = 'switchOverlay';
+            overlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.85); z-index: 5000;
+                display: flex; justify-content: center; align-items: center;
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            const menu = document.createElement('div');
+            menu.style.cssText = `
+                background: linear-gradient(135deg, #1a1a2e, #16213e);
+                border: 4px solid #FFD700; border-radius: 20px;
+                padding: 2rem; max-width: 500px; width: 90%;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            `;
+            
+            menu.innerHTML = `<h3 style="color:#FFD700;font-family:'Press Start 2P';margin-bottom:1.5rem;text-align:center">🔄 Cambiar Freekie</h3>`;
+            
+            gameState.party.forEach((freekie, index) => {
+                if (index === 0 || freekie.currentHP <= 0) return;
+                
+                const btn = document.createElement('button');
+                btn.className = 'menuOption';
+                btn.style.cssText = `margin: 0.5rem 0; text-align: left; display: flex; align-items: center; gap: 1rem;`;
+                btn.innerHTML = `
+                    <img src="${freekie.sprite}" style="width:50px;height:50px;image-rendering:pixelated;border-radius:8px">
+                    <div>
+                        <div style="font-weight:bold;color:#FFD700">${freekie.nombre} Nv.${freekie.nivel}</div>
+                        <div style="font-size:0.9rem">HP: ${freekie.currentHP}/${freekie.hp} • ${freekie.tipo}</div>
+                    </div>
+                `;
+                btn.onclick = () => SwitchSystem.performSwitch(index, overlay);
+                menu.appendChild(btn);
+            });
+            
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'menuOption';
+            cancelBtn.style.cssText = 'margin-top:1rem;background:linear-gradient(135deg,#FF6B6B,#FF4444)';
+            cancelBtn.textContent = '❌ Cancelar';
+            cancelBtn.onclick = () => overlay.remove();
+            menu.appendChild(cancelBtn);
+            
+            overlay.appendChild(menu);
+            document.body.appendChild(overlay);
+        },
+        
+        performSwitch(newIndex, overlay) {
+            const battle = gameState.battle;
+            const oldFreekie = battle.playerFreekie;
+            const newFreekie = JSON.parse(JSON.stringify(gameState.party[newIndex]));
+            
+            battle.playerFreekie = newFreekie;
+            
+            document.getElementById('battleText').textContent = 
+                `¡Regresa, ${oldFreekie.nombre}! ¡Adelante, ${newFreekie.nombre}!`;
+            
+            const playerSprite = document.getElementById('playerFreekieSprite');
+            playerSprite.style.animation = 'attackAnim 0.4s';
+            setTimeout(() => {
+                playerSprite.style.animation = '';
+                document.getElementById('playerFreekieImg').src = newFreekie.sprite;
+                document.getElementById('playerFreekieName').textContent = newFreekie.nombre;
+                document.getElementById('playerFreekieLevel').textContent = newFreekie.nivel;
+                document.getElementById('playerFreekieHP').textContent = `${newFreekie.currentHP}/${newFreekie.hp}`;
+                document.getElementById('playerHPBar').style.width = (newFreekie.currentHP / newFreekie.hp * 100) + '%';
+                
+                if (typeof updatePartyDisplay === 'function') updatePartyDisplay();
+                overlay.remove();
+                
+                setTimeout(() => {
+                    battle.turn = "enemy";
+                    if (typeof updateTurnIndicator === 'function') updateTurnIndicator();
+                    if (typeof enemyAttack === 'function') enemyAttack();
+                }, 1500);
+            }, 400);
+        }
+    };
+    
+    // ===== 2. DIFERENCIA DE NIVELES MÁS NOTABLE =====
+    const LevelDifferenceSystem = {
+        init() {
+            const originalCalc = window.calculateDamage;
+            if (originalCalc) {
+                window.calculateDamage = function(attacker, defender, move) {
+                    const baseDamage = originalCalc.call(this, attacker, defender, move);
+                    
+                    // Multiplicador por diferencia de nivel: ±7.5% por nivel
+                    const levelDiff = attacker.nivel - defender.nivel;
+                    const levelMultiplier = 1 + (levelDiff * 0.075);
+                    
+                    // Bonus adicional si la diferencia es mayor a 5 niveles
+                    const bonusMultiplier = Math.abs(levelDiff) > 5 ? 1.1 : 1;
+                    
+                    return Math.max(1, Math.floor(baseDamage * levelMultiplier * bonusMultiplier));
+                };
+            }
+            
+            // Hook para mostrar indicador visual
+            const originalUpdateDisplay = window.updateBattleDisplay;
+            if (originalUpdateDisplay) {
+                window.updateBattleDisplay = function() {
+                    originalUpdateDisplay.call(this);
+                    
+                    const p = gameState.battle?.playerFreekie;
+                    const e = gameState.battle?.enemyFreekie;
+                    if (!p || !e) return;
+                    
+                    const diff = p.nivel - e.nivel;
+                    
+                    if (Math.abs(diff) >= 3) {
+                        let indicator = document.getElementById('levelIndicator');
+                        if (!indicator) {
+                            indicator = document.createElement('div');
+                            indicator.id = 'levelIndicator';
+                            indicator.style.cssText = `
+                                position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+                                padding: 5px 15px; border-radius: 15px; font-size: 12px;
+                                font-family: 'Press Start 2P'; font-weight: bold;
+                                background: ${diff > 0 ? 'linear-gradient(135deg, #4CAF50, #8BC34A)' : 'linear-gradient(135deg, #FF6B6B, #FF5252)'};
+                                color: white; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                            `;
+                            document.getElementById('battleScreen')?.appendChild(indicator);
+                        }
+                        indicator.textContent = diff > 0 ? 
+                            `⭐ Ventaja: +${diff} niveles` : 
+                            `⚠️ Desventaja: ${diff} niveles`;
+                    }
+                };
+            }
+        }
+    };
+    
+    // ===== 3. MÁS FREEKIES PARA GIMNASIOS =====
+    const GymEnhancement = {
+        bonusTeams: {
+            1: [ // Gimnasio Fuego - Agregar 2 Freekies extra
+                { id: 10, nivel: 15, tipo: "Eléctrico" },
+                { id: 24, nivel: 17, tipo: "Veneno" }
+            ],
+            2: [ // Gimnasio Agua
+                { id: 22, nivel: 19, tipo: "Hielo" },
+                { id: 12, nivel: 21, tipo: "Roca" }
+            ],
+            3: [ // Gimnasio Planta
+                { id: 20, nivel: 23, tipo: "Normal" },
+                { id: 16, nivel: 25, tipo: "Lucha" }
+            ],
+            4: [ // Gimnasio Eléctrico
+                { id: 14, nivel: 27, tipo: "Psíquico" },
+                { id: 18, nivel: 29, tipo: "Fantasma" }
+            ]
+        },
+        
+        init() {
+            if (typeof gyms === 'undefined') return;
+            
+            gyms.forEach(gym => {
+                const bonuses = this.bonusTeams[gym.id];
+                if (bonuses && typeof freekiesDB !== 'undefined') {
+                    bonuses.forEach(bonus => {
+                        const template = freekiesDB.find(f => f.id === bonus.id);
+                        if (template && !gym.equipo.some(e => e.id === bonus.id)) {
+                            gym.equipo.push({
+                                id: bonus.id,
+                                nivel: bonus.nivel,
+                                nombre: template.nombre,
+                                tipo: bonus.tipo,
+                                sprite: template.sprite
+                            });
+                        }
+                    });
+                }
+            });
+            console.log(`🏟️ Gimnasios mejorados: equipos extendidos`);
+        }
+    };
+    
+    // ===== 4. SISTEMA DE TIPOS MEJORADO =====
+    const EnhancedTypeChart = {
+        chart: {
+            Fuego:    { fuerte: ["Planta", "Hielo", "Acero", "Bicho"], debil: ["Agua", "Roca", "Tierra"], inmune: [] },
+            Agua:     { fuerte: ["Fuego", "Roca", "Tierra"], debil: ["Planta", "Eléctrico"], inmune: [] },
+            Planta:   { fuerte: ["Agua", "Roca", "Tierra"], debil: ["Fuego", "Hielo", "Veneno", "Volador", "Bicho"], inmune: [] },
+            Eléctrico:{ fuerte: ["Agua", "Volador"], debil: ["Roca", "Tierra", "Planta", "Dragón"], inmune: ["Tierra"] },
+            Roca:     { fuerte: ["Fuego", "Hielo", "Volador", "Bicho"], debil: ["Agua", "Planta", "Lucha", "Tierra", "Acero"], inmune: [] },
+            Psíquico: { fuerte: ["Lucha", "Veneno"], debil: ["Psíquico", "Acero"], inmune: ["Fantasma", "Siniestro"] },
+            Lucha:    { fuerte: ["Normal", "Roca", "Acero", "Hielo", "Siniestro"], debil: ["Veneno", "Volador", "Psíquico", "Bicho", "Hada"], inmune: ["Fantasma"] },
+            Fantasma: { fuerte: ["Psíquico", "Fantasma"], debil: ["Siniestro"], inmune: ["Normal", "Lucha"] },
+            Normal:   { fuerte: [], debil: [], inmune: ["Fantasma"] },
+            Hielo:    { fuerte: ["Planta", "Tierra", "Volador", "Dragón"], debil: ["Fuego", "Agua", "Hielo", "Acero"], inmune: [] },
+            Veneno:   { fuerte: ["Planta", "Hada"], debil: ["Veneno", "Roca", "Tierra", "Fantasma"], inmune: ["Acero"] },
+            Acero:    { fuerte: ["Hielo", "Roca", "Hada"], debil: ["Fuego", "Agua", "Eléctrico", "Acero"], inmune: ["Veneno"] },
+            Dragón:   { fuerte: ["Dragón"], debil: ["Acero"], inmune: ["Hada"] },
+            Hada:     { fuerte: ["Lucha", "Dragón", "Siniestro"], debil: ["Fuego", "Veneno", "Acero"], inmune: ["Dragón"] },
+            Volador:  { fuerte: ["Planta", "Lucha", "Bicho"], debil: ["Roca", "Acero", "Eléctrico"], inmune: ["Tierra"] },
+            Tierra:   { fuerte: ["Fuego", "Eléctrico", "Veneno", "Roca", "Acero"], debil: ["Planta", "Bicho"], inmune: ["Volador"] },
+            Bicho:    { fuerte: ["Planta", "Psíquico", "Siniestro"], debil: ["Fuego", "Lucha", "Veneno", "Volador", "Fantasma", "Acero", "Hada"], inmune: [] },
+            Siniestro:{ fuerte: ["Psíquico", "Fantasma"], debil: ["Lucha", "Siniestro", "Hada"], inmune: [] }
+        },
+        
+        init() {
+            const originalGetEffectiveness = window.getEffectiveness;
+            window.getEffectiveness = function(atkType, defType) {
+                const data = EnhancedTypeChart.chart[atkType];
+                if (!data) return originalGetEffectiveness ? originalGetEffectiveness(atkType, defType) : 1;
+                
+                if (data.inmune && data.inmune.includes(defType)) return 0;
+                if (data.fuerte && data.fuerte.includes(defType)) return 2;
+                if (data.debil && data.debil.includes(defType)) return 0.5;
+                return 1;
+            };
+            
+            // Agregar tooltip de tipos en batalla
+            const originalUpdateBattle = window.updateBattleDisplay;
+            if (originalUpdateBattle) {
+                window.updateBattleDisplay = function() {
+                    originalUpdateBattle.call(this);
+                    
+                    const p = gameState.battle?.playerFreekie;
+                    const e = gameState.battle?.enemyFreekie;
+                    if (!p || !e) return;
+                    
+                    let indicator = document.getElementById('typeIndicator');
+                    if (!indicator) {
+                        indicator = document.createElement('div');
+                        indicator.id = 'typeIndicator';
+                        indicator.style.cssText = `
+                            position: absolute; bottom: 230px; left: 50%; transform: translateX(-50%);
+                            background: rgba(0,0,0,0.7); padding: 8px 16px; border-radius: 10px;
+                            font-size: 11px; color: #ddd; font-family: 'VT323';
+                            border: 2px solid #FFD700;
+                        `;
+                        document.getElementById('battleScreen')?.appendChild(indicator);
+                    }
+                    
+                    const effectiveness = window.getEffectiveness(p.tipo, e.tipo);
+                    let text = `${p.tipo} → ${e.tipo}: `;
+                    if (effectiveness === 2) text += '✨ ¡Muy efectivo!';
+                    else if (effectiveness === 0.5) text += '⚠️ Poco efectivo';
+                    else if (effectiveness === 0) text += '🚫 Sin efecto';
+                    else text += '✓ Normal';
+                    indicator.textContent = text;
+                };
+            }
+        }
+    };
+    
+    // ===== 5. TIENDA Y ITEMS EN COMBATE =====
+    const BattleItemsSystem = {
+        shopItems: {
+            potion:      { name: "Poción", price: 200, effect: (t) => Math.min(t.maxHP || t.hp, (t.currentHP || t.hp) + 20), desc: "Recupera 20 HP", icon: "🧪" },
+            superpotion: { name: "Superpoción", price: 500, effect: (t) => Math.min(t.maxHP || t.hp, (t.currentHP || t.hp) + 50), desc: "Recupera 50 HP", icon: "💖" },
+            hyperpotion: { name: "Hiperpoción", price: 1200, effect: (t) => Math.min(t.maxHP || t.hp, (t.currentHP || t.hp) + 120), desc: "Recupera 120 HP", icon: "💗" },
+            antidote:    { name: "Antídoto", price: 150, effect: (t) => { t.status = null; return true; }, desc: "Cura veneno", icon: "💊" },
+            revive:      { name: "Revivir", price: 1500, effect: (t) => { if (t.currentHP <= 0) t.currentHP = Math.floor(t.hp * 0.5); }, desc: "Revive con 50% HP", icon: "✨" }
+        },
+        
+        init() {
+            const originalUpdateActions = window.updateBattleActions;
+            if (originalUpdateActions) {
+                window.updateBattleActions = function() {
+                    originalUpdateActions.call(this);
+                    
+                    const actionsDiv = document.getElementById('battleActions');
+                    if (!actionsDiv || document.getElementById('itemsBtn')) return;
+                    
+                    const itemsBtn = document.createElement('button');
+                    itemsBtn.id = 'itemsBtn';
+                    itemsBtn.className = 'actionBtn';
+                    itemsBtn.innerHTML = '🎒 ITEMS';
+                    itemsBtn.style.background = 'linear-gradient(135deg, #2ecc71, #27ae60)';
+                    itemsBtn.onclick = () => BattleItemsSystem.openItemsMenu();
+                    
+                    const catchBtn = Array.from(actionsDiv.children).find(btn => btn.textContent.includes('CAPTURAR'));
+                    if (catchBtn) {
+                        actionsDiv.insertBefore(itemsBtn, catchBtn);
+                    } else {
+                        actionsDiv.insertBefore(itemsBtn, actionsDiv.firstChild);
+                    }
+                };
+            }
+        },
+        
+        openItemsMenu() {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.85); z-index: 5000;
+                display: flex; justify-content: center; align-items: center;
+            `;
+            
+            const menu = document.createElement('div');
+            menu.style.cssText = `
+                background: linear-gradient(135deg, #1a1a2e, #16213e);
+                border: 4px solid #FFD700; border-radius: 20px;
+                padding: 1.5rem; max-width: 450px; width: 95%;
+                max-height: 70vh; overflow-y: auto;
+            `;
+            
+            menu.innerHTML = `
+                <h3 style="color:#FFD700;font-family:'Press Start 2P';margin-bottom:1rem;text-align:center">🎒 Mochila de Combate</h3>
+                <div style="font-size:0.9rem;color:#aaa;margin-bottom:1rem">💰 Dinero: ${gameState.player?.money || 0}¥</div>
+            `;
+            
+            Object.entries(this.shopItems).forEach(([key, item]) => {
+                const owned = gameState.inventory?.[key] || 0;
+                const btn = document.createElement('button');
+                btn.className = 'menuOption';
+                btn.style.cssText = `margin: 0.4rem 0; display: flex; justify-content: space-between; align-items: center;`;
+                btn.disabled = owned <= 0;
+                btn.innerHTML = `
+                    <span>${item.icon} ${item.name} <small style="color:#888">(${item.desc})</small></span>
+                    <span style="background:#333;padding:3px 10px;border-radius:10px;font-size:0.85rem">x${owned}</span>
+                `;
+                btn.onclick = () => BattleItemsSystem.useItem(key, item, overlay);
+                menu.appendChild(btn);
+            });
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'menuOption';
+            closeBtn.style.cssText = 'margin-top:1rem;background:linear-gradient(135deg,#FF6B6B,#FF4444)';
+            closeBtn.textContent = '❌ Cerrar';
+            closeBtn.onclick = () => overlay.remove();
+            menu.appendChild(closeBtn);
+            
+            overlay.appendChild(menu);
+            document.body.appendChild(overlay);
+        },
+        
+        useItem(key, item, overlay) {
+            if (!gameState.inventory || gameState.inventory[key] <= 0) return;
+            
+            const target = gameState.battle?.playerFreekie;
+            if (!target) return;
+            
+            const prevHP = target.currentHP;
+            if (item.effect) item.effect(target);
+            
+            gameState.inventory[key]--;
+            const newHP = target.currentHP;
+            const healed = newHP - prevHP;
+            
+            document.getElementById('battleText').textContent = 
+                healed > 0 ? `¡Usaste ${item.name}! +${healed} HP ❤️` : `¡Usaste ${item.name}!`;
+            
+            document.getElementById('playerFreekieHP').textContent = `${target.currentHP}/${target.hp}`;
+            document.getElementById('playerHPBar').style.width = (target.currentHP / target.hp * 100) + '%';
+            if (typeof updatePartyDisplay === 'function') updatePartyDisplay();
+            
+            overlay.remove();
+            
+            setTimeout(() => {
+                gameState.battle.turn = "enemy";
+                if (typeof updateTurnIndicator === 'function') updateTurnIndicator();
+                if (typeof enemyAttack === 'function') enemyAttack();
+            }, 1200);
+        }
+    };
+    
+    // ===== 6. MENÚ MEJORADO CON MÁS FUNCIONALIDADES =====
+    const EnhancedMenu = {
+        init() {
+            const menu = document.getElementById('mainMenu');
+            if (!menu) return;
+            
+            // Verificar si ya se agregaron las opciones
+            if (menu.querySelector('[data-enhanced]')) return;
+            
+            const newOptions = [
+                { text: '🛒 TIENDA', action: () => EnhancedMenu.openShop(), color: '#2ecc71' },
+                { text: '📖 FREEKIDEX', action: () => EnhancedMenu.openPokedex(), color: '#3498db' },
+                { text: '⚙️ AJUSTES', action: () => EnhancedMenu.openSettings(), color: '#9b59b6' }
+            ];
+            
+            const saveBtn = Array.from(menu.children).find(el => el.textContent?.includes('GUARDAR'));
+            
+            newOptions.forEach(opt => {
+                const btn = document.createElement('div');
+                btn.className = 'menuOption';
+                btn.setAttribute('data-enhanced', 'true');
+                btn.textContent = opt.text;
+                btn.style.background = `linear-gradient(135deg, ${opt.color}, ${this.darken(opt.color, 20)})`;
+                btn.onclick = (e) => { e.stopPropagation(); opt.action(); };
+                if (saveBtn) {
+                    menu.insertBefore(btn, saveBtn);
+                } else {
+                    menu.appendChild(btn);
+                }
+            });
+        },
+        
+        darken(color, percent) {
+            const num = parseInt(color.replace('#',''), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = Math.max((num >> 16) - amt, 0);
+            const G = Math.max((num >> 8 & 0x00FF) - amt, 0);
+            const B = Math.max((num & 0x0000FF) - amt, 0);
+            return `#${(0x1000000 + R*0x10000 + G*0x100 + B).toString(16).slice(1)}`;
+        },
+        
+        openShop() {
+            let content = "🛒 TIENDA OFICIAL\n\n";
+            if (typeof BattleItemsSystem !== 'undefined') {
+                Object.entries(BattleItemsSystem.shopItems).forEach(([key, item]) => {
+                    const owned = gameState.inventory?.[key] || 0;
+                    content += `${item.icon} ${item.name.padEnd(15)} ${item.price}¥ [x${owned}]\n`;
+                });
+            }
+            content += `\n💰 Tu dinero: ${gameState.player?.money || 0}¥\n\n`;
+            content += "💡 Tip: Usa items desde el menú de batalla con 🎒 ITEMS";
+            alert(content);
+        },
+        
+        openPokedex() {
+            if (typeof freekiesDB === 'undefined') { alert("📖 Freekidex no disponible"); return; }
+            const caught = (gameState.party || []).map(f => f.id);
+            const seen = new Set(caught);
+            
+            let content = `📖 FREEKIDEX - ${seen.size}/${freekiesDB.length} vistos\n\n`;
+            freekiesDB.slice(0, 12).forEach(f => {
+                const status = caught.includes(f.id) ? '✅' : seen.has(f.id) ? '👁️' : '❓';
+                content += `${status} #${String(f.id).padStart(3, '0')} ${f.nombre.padEnd(15)} [${f.tipo}]\n`;
+            });
+            content += "\n... ¡Captura más para descubrir!";
+            alert(content);
+        },
+        
+        openSettings() {
+            const current = gameState?.audio?.enabled ? '🔊 ON' : '🔇 OFF';
+            const choice = confirm(`⚙️ AJUSTES\n\n• Sonido: ${current}\n• Efectos: Activados\n• Guardado Auto: Cada 2 min\n\n¿Cambiar sonido?`);
+            if (choice && typeof toggleAudio === 'function') {
+                toggleAudio();
+                alert(`Sonido ${gameState?.audio?.enabled ? 'activado' : 'desactivado'} ✓`);
+            }
+        }
+    };
+    
+    // ===== 7. MAPA MEJORADO (LEVE) =====
+    const MapEnhancement = {
+        init() {
+            this.addMinimap();
+            this.addLandmarks();
+            this.enhanceZones();
+        },
+        
+        addMinimap() {
+            if (document.getElementById('minimap')) return;
+            
+            const minimap = document.createElement('div');
+            minimap.id = 'minimap';
+            minimap.style.cssText = `
+                position: fixed; bottom: 20px; left: 20px;
+                width: 120px; height: 120px;
+                background: rgba(0,0,0,0.7); border: 3px solid #FFD700;
+                border-radius: 15px; z-index: 150;
+                display: none;
+            `;
+            document.getElementById('gameScreen')?.appendChild(minimap);
+            
+            document.addEventListener('keydown', (e) => {
+                if (e.key.toLowerCase() === 'm' && gameState?.screen === 'game') {
+                    minimap.style.display = minimap.style.display === 'none' ? 'block' : 'none';
+                    if (minimap.style.display !== 'none') this.renderMinimap();
+                }
+            });
+        },
+        
+        renderMinimap() {
+            const minimap = document.getElementById('minimap');
+            if (!minimap || !gameState?.player) return;
+            
+            minimap.innerHTML = '';
+            const scale = 2;
+            
+            const playerDot = document.createElement('div');
+            playerDot.style.cssText = `
+                position: absolute;
+                left: ${gameState.player.x * scale}px;
+                top: ${gameState.player.y * scale}px;
+                width: 4px; height: 4px;
+                background: #FFD700; border-radius: 50%;
+                transform: translate(-50%, -50%);
+            `;
+            minimap.appendChild(playerDot);
+            
+            if (typeof gyms !== 'undefined') {
+                gyms.forEach(gym => {
+                    const dx = gym.x - gameState.player.x;
+                    const dy = gym.y - gameState.player.y;
+                    if (Math.abs(dx) < 30 && Math.abs(dy) < 30) {
+                        const gymDot = document.createElement('div');
+                        gymDot.style.cssText = `
+                            position: absolute;
+                            left: ${gym.x * scale}px;
+                            top: ${gym.y * scale}px;
+                            width: 6px; height: 6px;
+                            background: #FF6B6B; border-radius: 50%;
+                            transform: translate(-50%, -50%);
+                            border: 1px solid white;
+                        `;
+                        gymDot.title = gym.nombre;
+                        minimap.appendChild(gymDot);
+                    }
+                });
+            }
+        },
+        
+        addLandmarks() {
+            const originalDraw = window.drawGame;
+            if (originalDraw) {
+                window.drawGame = function() {
+                    originalDraw.call(this);
+                    
+                    const grassAreas = [
+                        { x: 22, y: 22, w: 6, h: 6 },
+                        { x: 12, y: 12, w: 5, h: 5 },
+                        { x: 32, y: 18, w: 4, h: 4 },
+                        { x: 18, y: 38, w: 5, h: 5 },
+                        { x: 42, y: 22, w: 4, h: 4 }
+                    ];
+                    
+                    grassAreas.forEach(area => {
+                        const dx = Math.abs(area.x - gameState.player.x);
+                        const dy = Math.abs(area.y - gameState.player.y);
+                        if (dx < 8 && dy < 8) {
+                            ctx.save();
+                            ctx.globalAlpha = 0.3;
+                            ctx.fillStyle = '#2D8B2D';
+                            ctx.fillRect(
+                                (area.x - gameState.player.x) * gameState.map.tileSize + canvas.width/2,
+                                (area.y - gameState.player.y) * gameState.map.tileSize + canvas.height/2,
+                                area.w * gameState.map.tileSize,
+                                area.h * gameState.map.tileSize
+                            );
+                            ctx.restore();
+                        }
+                    });
+                };
+            }
+        },
+        
+        enhanceZones() {
+            const originalMove = window.movePlayer;
+            if (originalMove) {
+                window.movePlayer = function(dx, dy) {
+                    originalMove.call(this, dx, dy);
+                    const minimap = document.getElementById('minimap');
+                    if (minimap && minimap.style.display !== 'none') {
+                        MapEnhancement.renderMinimap();
+                    }
+                };
+            }
+        }
+    };
+    
+    // ===== INICIALIZACIÓN DEL PACK =====
+    function initAll() {
+        const initInterval = setInterval(() => {
+            if (typeof gameState !== 'undefined' && typeof freekiesDB !== 'undefined') {
+                clearInterval(initInterval);
+                
+                SwitchSystem.init();
+                LevelDifferenceSystem.init();
+                GymEnhancement.init();
+                EnhancedTypeChart.init();
+                BattleItemsSystem.init();
+                EnhancedMenu.init();
+                MapEnhancement.init();
+                
+                console.log('✅ Freekies Enhancement Pack v5.0 loaded!');
+                
+                // Mensaje de bienvenida
+                if (gameState.screen === 'title') {
+                    console.log('💡 Tip: Presiona M para mostrar/ocultar el minimap');
+                }
+            }
+        }, 100);
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAll);
+    } else {
+        initAll();
+    }
+    
+    // Exponer para debugging
+    window.Enhancements = {
+        Switch: SwitchSystem,
+        Levels: LevelDifferenceSystem,
+        Gyms: GymEnhancement,
+        Types: EnhancedTypeChart,
+        Items: BattleItemsSystem,
+        Menu: EnhancedMenu,
+        Map: MapEnhancement
+    };
+    
+})();
+</script>
+<!-- ===================================================== -->
+<!-- FIN DEL ENHANCEMENT PACK v5.0 -->
+<!-- ===================================================== -->
 </body>
 </html>
 
